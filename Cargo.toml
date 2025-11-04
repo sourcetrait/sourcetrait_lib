@@ -1,4 +1,19 @@
 [workspace]
 resolver = "2"
 members = [
+  "crates/sourcetrait_lib_note",
 ]
+
+[workspace.dependencies]
+chrono = "0.4"
+convert_case = "0.8"
+derive_builder = "0.20"
+dirs = "6"
+serde = { version = "1", features = ["derive"] }
+shellexpand = { version = "3", features = ["path"] }
+strum = { version = "0.27", features = ["derive"] }
+thiserror = "2"
+toml = "0.8"
+sourcetrait_chronox = "1"
+sourcetrait_tomlx = "3"
+sourcetrait_testing = "4"
