@@ -1,6 +1,7 @@
 SourceTrait Library: Note
 ================================================================================
-[![Crate Badge]][Crate] [![Docs Badge]][Docs] [![License Badge]][License]
+[![Crate Badge]][Crate] [![License Badge]][License]
+[![Docs Badge]][Docs] [![Changes Badge]][Changes]
 
 *Markdown notes manager*
 
@@ -45,3 +46,5 @@ If not, see https://www.gnu.org/licenses/.
 [Docs Badge]: https://img.shields.io/badge/docs-blue
 [License]: #License-AGPL3
 [License Badge]: https://img.shields.io/badge/license-AGPL3-blue.svg
+[Changes]: ./docs/CHANGES.md
+[Changes Badge]: https://img.shields.io/badge/changes-blue

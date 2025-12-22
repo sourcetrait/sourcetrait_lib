@@ -1,2 +1,2 @@
-DESIGN: SourceTrait Note Library
+CHANGES: SourceTrait Library: Note
 ================================================================================
