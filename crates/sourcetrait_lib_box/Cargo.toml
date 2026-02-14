@@ -1,0 +1,20 @@
+[package]
+name = "sourcetrait_lib_box"
+version = "0.1.0"
+edition = "2024"
+description = "Sandboxed command-line environments for data analytics scripting"
+authors = ["SourceTrait <development@sourcetrait.com>"]
+license = "AGPL-3.0-or-later"
+repository = "https://github.com/sourcetrait/sourcetrait_lib"
+homepage = "https://sourcetrait.com"
+categories = []
+keywords = ["sourcetrait", "lib", "box", "podman"]
+
+[dependencies]
+oci-client.workspace = true
+serde_json.workspace = true
+snafu.workspace = true
+reqwest.workspace = true
+
+[dev-dependencies]
+sourcetrait_testing.workspace = true
