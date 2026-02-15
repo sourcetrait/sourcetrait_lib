@@ -1,27 +1,56 @@
 FROM registry.fedoraproject.org/fedora-toolbox:latest
-LABEL name="sourcetrait/box" version="0.0.1"
+LABEL name="sourcetrait/box" version="0.0.3"
 RUN dnf -y upgrade
-RUN dnf -y install gocryptfs
 # required for sudo (nopasswd) to work
 RUN sed -i 's/account    include      system-auth/account    sufficient   pam_permit.so/' /etc/pam.d/sudo
 RUN sed -i 's|auth       include      system-auth|auth       required     pam_exec.so expose_authtok /usr/local/bin/check_password.sh|' /etc/pam.d/sudo
-# install nushell
-COPY --chmod=0644 assets/nushell.repo /etc/yum.repos.d/
-RUN dnf -y install nushell
+
+# install repos
+COPY --chmod=0640 assets/gemfury-nushell.repo /etc/yum.repos.d/
+COPY --chmod=0640 assets/charm-glow.repo /etc/yum.repos.d/
+RUN dnf -y install nushell helix openssl-devel glow
+
 # add user with sudo (no passwd)
 RUN useradd -m -k /dev/null -s /usr/bin/nu box
 RUN echo "box ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/box
 RUN chmod 0440 /etc/sudoers.d/box
 USER box
 WORKDIR /home/box
-RUN mkdir -p app/bin app/lib app/src app/var data misc text sys/doc tmp
-COPY assets/README.box.md sys/doc
-# run the user.nu init script
+
+RUN mkdir app data info local misc proj sys tmp
+RUN mkdir app/bin app/lib app/share
+RUN mkdir local/bin local/lib local/etc local/share local/src
+
+ENV XDG_CACHE_HOME "sys/.local/cache"
+ENV RUSTUP_HOME "sys/.rustup"
+ENV CARGO_HOME "sys/.cargo"
+
+# initialize nu in home
 RUN nu -l -c banner
-COPY assets/login.nu .config/nushell/
-COPY assets/box.banner .config/nushell/
-RUN mkdir /tmp/init
-COPY assets/config.nu /tmp/init/
-RUN cat /tmp/init/config.nu >> .config/nushell/config.nu
-RUN rm -rf /tmp/init
-ENTRYPOINT ["/usr/bin/nu", "-l"]
+
+# install rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="${PATH}:/home/box/sys/.cargo/bin"
+RUN rm .profile
+
+RUN cargo install --locked cargo-cache
+RUN cargo-cache -e
+
+COPY --chown=box assets/WELCOME.md ./
+COPY --chown=box assets/README.app.md app/README.md
+COPY --chown=box assets/README.info.md info/README.md
+COPY --chown=box assets/README.data.md data/README.md
+COPY --chown=box assets/README.local.md local/README.md
+COPY --chown=box assets/README.misc.md misc/README.md
+COPY --chown=box assets/login.nu .config/nushell/
+COPY --chown=box assets/banner.nu .config/nushell/
+COPY --chown=box assets/config.nu .config/nushell/
+
+RUN glow --version
+RUN sed -i'' 's/style: "auto"/style: "tokyo-night"/g' .config/glow/glow.yml
+
+RUN chmod -R go-rwx .
+
+COPY --chmod=755 assets/entrypoint.sh /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+#ENTRYPOINT ["/usr/bin/nu", "-l"]

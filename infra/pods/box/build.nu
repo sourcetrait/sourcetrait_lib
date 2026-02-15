@@ -1,2 +1,2 @@
 #!/usr/bin/env nu
-podman build -t sourcetrait/box .
+podman build -t ghcr.io/sourcetrait/box .
