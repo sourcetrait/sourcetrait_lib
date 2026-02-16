@@ -1,11 +1,11 @@
 #!/usr/bin/env nu
 
 def init [logname: string] {
-  let prelog = $"(ansi cyan)($logname)(ansi reset)"
-  let errlog = $"(ansi red)($logname)] error:(ansi reset)"
+  let prelog = $"(ansi cyan)[($logname)](ansi reset)"
+  let errlog = $"(ansi red)[($logname)] error:(ansi reset)"
   
   # start the machine if needed
-  try { podman info out+err>| ignore } catch {
+  if (podman info | complete).exit_code != 0 {
     print $"($prelog) starting machine ..."
     podman machine start
   }
@@ -29,6 +29,13 @@ def init [logname: string] {
   };
 
   $app
+}
+
+def "main pull" [] {
+  let app = init "pull"
+  print $"($app.prelog) pulling (ansi green)($app.ref)(ansi reset) ..."
+  podman pull $app.ref
+  print $"($app.prelog) (ansi green)done(ansi reset)"
 }
 
 def "main build" [] {
