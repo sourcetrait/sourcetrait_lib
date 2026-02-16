@@ -34,7 +34,10 @@ def init [logname: string] {
 def "main pull" [] {
   let app = init "pull"
   print $"($app.prelog) pulling (ansi green)($app.ref)(ansi reset) ..."
-  podman pull $app.ref
+  podman manifest rm $app.ref out+err>| ignore
+  podman rmi $app.ref out+err>| ignore
+  podman manifest create $app.ref
+  podman manifest add --all $app.ref docker://($app.ref)
   print $"($app.prelog) (ansi green)done(ansi reset)"
 }
 
@@ -64,11 +67,13 @@ def "main publish" [] {
   print $"($app.prelog) building (ansi green)($app.host_platform)(ansi reset) ..."
   podman build --platform $app.host_platform --manifest $app.ref .
 
-  # build everything else
-  for platform in $app.platforms {
-    if $platform == $app.host_platform { continue }
-    print $"($app.prelog) building (ansi green)($platform)(ansi reset) ..."
-    podman build --platform $platform --manifest $app.ref .
+  # linux only: build everything else
+  if $nu.os-info.name == "linux" {
+    for platform in $app.platforms {
+      if $platform == $app.host_platform { continue }
+      print $"($app.prelog) building (ansi green)($platform)(ansi reset) ..."
+      podman build --platform $platform --manifest $app.ref .
+    }
   }
 
   print $"($app.prelog) pushing to (ansi green)($app.repo)(ansi reset) ..."
