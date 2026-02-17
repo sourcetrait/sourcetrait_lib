@@ -1,14 +1,11 @@
 FROM registry.fedoraproject.org/fedora-toolbox:latest
-LABEL name="sourcetrait/box" version="0.0.3"
+LABEL name="sourcetrait/box" version="0.0.4"
 RUN dnf -y upgrade
 
 # install repos
 COPY --chmod=0640 assets/gemfury-nushell.repo /etc/yum.repos.d/
 COPY --chmod=0640 assets/charm-glow.repo /etc/yum.repos.d/
 RUN dnf -y install nushell helix openssh-server openssl-devel glow
-
-# required for sudo (nopasswd) to work
-#RUN sed -i 's/account    include      system-auth/account    sufficient   pam_permit.so/' /etc/pam.d/sudo
 
 # required for ssh to work
 RUN chmod 640 /etc/shadow
@@ -58,6 +55,7 @@ RUN chmod -R go-rwx .
 COPY --chmod=755 assets/entrypoint.nushell.sh /usr/local/bin/
 COPY --chmod=750 assets/entrypoint.sshd.sh /usr/local/bin/
 
-#USER root
-#ENTRYPOINT ["/usr/local/bin/entrypoint.sshd.sh"]
-ENTRYPOINT ["/usr/local/bin/entrypoint.nushell.sh"]
+USER root
+ENTRYPOINT ["/usr/local/bin/entrypoint.sshd.sh"]
+
+#ENTRYPOINT ["/usr/local/bin/entrypoint.nushell.sh"]
