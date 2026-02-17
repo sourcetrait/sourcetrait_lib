@@ -105,13 +105,12 @@ def "main publish" [] {
   let app = init "pod/publish"
 
   # login if needed
-  try { podman login --get-login $app.repo out+err>| ignore } catch {
+  if (podman login --get-login $app.repo | complete).exit_code != 0 {
     print $"($app.prelog) logging in to (ansi magenta)($app.repo)(ansi reset) ..."
     podman login $app.repo
   }
 
   # build the local platform first so that we catch errors faster
-  let host_platform = $"linux/(podman machine info --format '{{.Host.Arch}}')"
   print $"($app.prelog) building (ansi magenta)($app.host_platform)(ansi reset) ..."
   podman build --platform $app.host_platform --manifest $app.ref .
 
