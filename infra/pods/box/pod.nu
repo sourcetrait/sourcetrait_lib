@@ -15,11 +15,13 @@ def init [logname: string] {
   }
 
   let ref = $"($toml.repo)/($toml.image):($toml.tag)"
-  let host_platform = $"linux/(podman machine info --format '{{.Host.Arch}}')"
+  let arch = (podman machine info --format '{{.Host.Arch}}')
+  let host_platform = $"linux/($arch)"
 
   mut app = {
     prelog: $prelog,
     errlog: $errlog,
+    arch: $arch,
     host_platform: $host_platform,
     repo: $toml.repo,
     image: $toml.image,
@@ -42,19 +44,21 @@ def "main pull" [] {
 }
 
 def "main build" [] {
-  let app = init "build"
+  let app = init "pod/build"
   print $"($app.prelog) building (ansi green)($app.host_platform)(ansi reset) ..."
-  podman build --platform $app.host_platform --manifest $app.ref .
+  let image_id = (podman build --platform $app.host_platform --manifest $app.ref . | tee { print } | lines | last | str trim)
+  podman tag $image_id localhost/($app.image):local
   print $"($app.prelog) (ansi green)done(ansi reset)"
 }
 
-def "main tty" [] {
-  let app = init "build"
-  podman run -it $app.ref
+def "main tty" [name: string] {
+  let app = init "pod/tty"
+  podman create --name $name localhost/($app.image):local
+  podman start $name
 }
 
 def "main publish" [] {
-  let app = init "publish"
+  let app = init "pod/publish"
 
   # login if needed
   try { podman login --get-login $app.repo out+err>| ignore } catch {

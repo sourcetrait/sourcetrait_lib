@@ -1,18 +1,22 @@
 FROM registry.fedoraproject.org/fedora-toolbox:latest
 LABEL name="sourcetrait/box" version="0.0.3"
 RUN dnf -y upgrade
-# required for sudo (nopasswd) to work
-RUN sed -i 's/account    include      system-auth/account    sufficient   pam_permit.so/' /etc/pam.d/sudo
-RUN sed -i 's|auth       include      system-auth|auth       required     pam_exec.so expose_authtok /usr/local/bin/check_password.sh|' /etc/pam.d/sudo
 
 # install repos
 COPY --chmod=0640 assets/gemfury-nushell.repo /etc/yum.repos.d/
 COPY --chmod=0640 assets/charm-glow.repo /etc/yum.repos.d/
-RUN dnf -y install nushell helix openssl-devel glow
+RUN dnf -y install nushell helix openssh-server openssl-devel glow
+
+# required for sudo (nopasswd) to work
+#RUN sed -i 's/account    include      system-auth/account    sufficient   pam_permit.so/' /etc/pam.d/sudo
+
+# required for ssh to work
+RUN chmod 640 /etc/shadow
 
 # add user with sudo (no passwd)
 RUN useradd -m -k /dev/null -s /usr/bin/nu box
-RUN echo "box ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/box
+RUN echo "box:box" | chpasswd
+RUN echo "box ALL=(ALL) ALL" > /etc/sudoers.d/box
 RUN chmod 0440 /etc/sudoers.d/box
 USER box
 WORKDIR /home/box
@@ -51,6 +55,9 @@ RUN sed -i'' 's/style: "auto"/style: "tokyo-night"/g' .config/glow/glow.yml
 
 RUN chmod -R go-rwx .
 
-COPY --chmod=755 assets/entrypoint.sh /usr/local/bin/entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-#ENTRYPOINT ["/usr/bin/nu", "-l"]
+COPY --chmod=755 assets/entrypoint.nushell.sh /usr/local/bin/
+COPY --chmod=750 assets/entrypoint.sshd.sh /usr/local/bin/
+
+#USER root
+#ENTRYPOINT ["/usr/local/bin/entrypoint.sshd.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.nushell.sh"]
