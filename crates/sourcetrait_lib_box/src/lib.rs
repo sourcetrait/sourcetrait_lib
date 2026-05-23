@@ -31,9 +31,8 @@ pub(crate) use self::{
 };
 
 pub(crate) use std::{
-    path::{Path, PathBuf},
     str::FromStr,
-    process::{Command, ExitStatus, ExitCode},
+    process::Command,
 };
 
 pub(crate) use serde_json as json;
