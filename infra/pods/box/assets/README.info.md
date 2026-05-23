@@ -1,3 +1,2 @@
 # ~/info Information
-
-Documentation directory.
+*Documentation, notes, etc.*

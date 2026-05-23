@@ -1,3 +1,4 @@
 # ~/local Home Local
+*Manually installed third-party software*
 
-Manually install software here that would normally go into `/usr/local`.
+Software that would normally go into `/usr/local` on a system-wide installation.

@@ -1,8 +1,7 @@
 # Welcome to Box!
 
-Documentation is in `~/info`. Use the `glow` command to read files there.
+Documentation is in `~/info`. Use the `glow` command to read markdown docs.
 
-Most sub-directories have their own *README* doc as well.
-
+Most top-level user directories have their own *README.md*.
 
 You can delete this file to disable the help message on each login.

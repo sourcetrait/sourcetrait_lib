@@ -1,16 +1,25 @@
+# do not use nushell's defualt banner; we have our own
 $env.config.show_banner = false
 
+# setup default env path to point at the app/bin and at cargo's bin
 $env.PATH = ($env.PATH | append [
   ($env.HOME | path join 'sys/.cargo/bin')
   ($env.HOME | path join 'app/bin')
 ])
 
+# enable full color support
 $env.COLORTERM = "truecolor"
+
+# defualt editor is helix
 $env.EDITOR = "hx"
 
-$env.XDG_CACHE_HOME = ($env.HOME | path join 'sys/.local/cache')
-$env.XDG_DATA_HOME = ($env.HOME | path join 'sys/.local/share')
-$env.XDG_STATE_HOME = ($env.HOME | path join 'sys/.local/state')
+# xdg cache, data, state default to dirs within `~/sys/.xdg`
+$env.XDG_CACHE_HOME = ($env.HOME | path join 'sys/.xdg/cache')
+$env.XDG_DATA_HOME = ($env.HOME | path join 'sys/.xdg/data')
+$env.XDG_STATE_HOME = ($env.HOME | path join 'sys/.xdg/state')
 
+# setup cargo's env
 $env.CARGO_HOME = ($env.HOME | path join 'sys/.cargo')
+
+# setup rustup's env
 $env.RUSTUP_HOME = ($env.HOME | path join 'sys/.rustup')

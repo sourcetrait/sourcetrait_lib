@@ -1,5 +1,7 @@
 #!/usr/bin/env nu
 
+# initialize podman and return an `app` object containing preloaded
+# configuration for the `pod.toml` and `user.toml` files
 def init [logname: string] {
   let prelog = $"(ansi cyan)[($logname)](ansi reset)"
   let errlog = $"(ansi red)[($logname)] error:(ansi reset)"

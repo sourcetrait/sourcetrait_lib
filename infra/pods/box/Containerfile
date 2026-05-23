@@ -18,12 +18,21 @@ RUN chmod 0440 /etc/sudoers.d/box
 USER box
 WORKDIR /home/box
 
+# our user directories take their own approach
+# many of the top-level ones have their own README.md
 RUN mkdir app data info local misc proj sys tmp
-RUN mkdir app/bin app/lib app/share
-RUN mkdir local/bin local/lib local/etc local/share local/src
+RUN mkdir -p app/{bin,lib,share}
+RUN mkdir -p local/{bin,lib,etc,share,src}
+RUN mkdir -p sys/.xdg/{cache,data,state}
 
-ENV XDG_CACHE_HOME "sys/.local/cache"
+# xdg cache, data, state live in dirs within `~/.sys/.xdg`
+ENV XDG_CACHE_HOME "sys/.xdg/cache"
+ENV XDG_DATA_HOME "sys/.xdg/data"
+ENV XDG_STATE_HOME "sys/.xdg/state"
+
+# setup rustup's env
 ENV RUSTUP_HOME "sys/.rustup"
+# setup cargo's env
 ENV CARGO_HOME "sys/.cargo"
 
 # initialize nu in home
@@ -37,25 +46,31 @@ RUN rm .profile
 RUN cargo install --locked cargo-cache
 RUN cargo-cache -e
 
+# copy user directory readme files to their locations
 COPY --chown=box assets/WELCOME.md ./
 COPY --chown=box assets/README.app.md app/README.md
 COPY --chown=box assets/README.info.md info/README.md
 COPY --chown=box assets/README.data.md data/README.md
 COPY --chown=box assets/README.local.md local/README.md
 COPY --chown=box assets/README.misc.md misc/README.md
+
+# copy nushell environment scripts
 COPY --chown=box assets/login.nu .config/nushell/
 COPY --chown=box assets/banner.nu .config/nushell/
 COPY --chown=box assets/config.nu .config/nushell/
 
+# configure glow: run it once to setup its `.config`, then edit the style
 RUN glow --version
 RUN sed -i'' 's/style: "auto"/style: "tokyo-night"/g' .config/glow/glow.yml
 
+# remove group,other permissions to everything in home
 RUN chmod -R go-rwx .
 
+# copy the two possible entrypoints: shell and ssh
 COPY --chmod=755 assets/entrypoint.nushell.sh /usr/local/bin/
 COPY --chmod=750 assets/entrypoint.sshd.sh /usr/local/bin/
 
+# run one of the entry points
 USER root
 ENTRYPOINT ["/usr/local/bin/entrypoint.sshd.sh"]
-
 #ENTRYPOINT ["/usr/local/bin/entrypoint.nushell.sh"]

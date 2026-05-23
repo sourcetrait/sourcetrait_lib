@@ -1,3 +1,2 @@
 # ~/data Data
-
-All data that isn't application-specific goes here.
+*Data that isn't application-specific*
