@@ -18,6 +18,14 @@ pub enum BoxError {
         src: String,
         code: i32,
     },
+    PodmanInfo {
+        src: String,
+        code: i32,
+    },
+    Ssh {
+        container: String,
+        source: io::Error,
+    },
 }
 
 #[derive(Debug)]
