@@ -1,27 +1,38 @@
 FROM registry.fedoraproject.org/fedora-toolbox:latest
-LABEL name="sourcetrait/box" version="0.0.5"
+LABEL name="sourcetrait/box" version="0.0.6"
 RUN dnf -y upgrade
 
-# install repos
-COPY --chmod=0640 assets/gemfury-nushell.repo /etc/yum.repos.d/
-COPY --chmod=0640 assets/charm-glow.repo /etc/yum.repos.d/
+# install custom dnf repositories
+COPY --chmod=0640 assets/repos/gemfury-nushell.repo /etc/yum.repos.d/
+COPY --chmod=0640 assets/repos/charm-glow.repo /etc/yum.repos.d/
+
+# install dnf packages
 RUN dnf -y install nushell helix openssh-server openssl-devel nodejs24 npm \
   glow ripgrep python3-lxml tokei fd-find tree-sitter-cli libtree-sitter-rust
 
 # required for ssh to work
 RUN chmod 640 /etc/shadow
 
-# add user with sudo (no passwd)
+# add user with sudo
 RUN useradd -m -k /dev/null -s /usr/bin/nu box
 RUN echo "box:box" | chpasswd
 RUN echo "box ALL=(ALL) ALL" > /etc/sudoers.d/box
 RUN chmod 0440 /etc/sudoers.d/box
+
+# install proprietary package: claude-code
+npm install -g @anthropic-ai/claude-code
+
+# copy the two possible entrypoints: ssh (normal) and shell (debug)
+COPY --chmod=750 assets/entrypoint.sshd.sh /usr/local/bin/
+COPY --chmod=755 assets/entrypoint.nushell.sh /usr/local/bin/
+
+# = BEGIN USER box =
 USER box
 WORKDIR /home/box
 
 # our user directories take their own approach
 # many of the top-level ones have their own README.md
-RUN mkdir app data info local misc proj sys tmp
+RUN mkdir ai app data info local misc proj sys tmp
 RUN mkdir -p app/{bin,lib,share}
 RUN mkdir -p local/{bin,lib,etc,share,src}
 RUN mkdir -p sys/.xdg/{cache,data,state}
@@ -52,31 +63,42 @@ RUN cargo install --locked ast-grep
 RUN cargo-cache -e
 
 # copy user directory readme files to their locations
-COPY --chown=box assets/WELCOME.md ./
-COPY --chown=box assets/README.app.md app/README.md
-COPY --chown=box assets/README.info.md info/README.md
-COPY --chown=box assets/ENVIRONMENT.info.md info/ENVIRONMENT.md
-COPY --chown=box assets/README.data.md data/README.md
-COPY --chown=box assets/README.local.md local/README.md
-COPY --chown=box assets/README.misc.md misc/README.md
+COPY --chown=box assets/docs/WELCOME.md ./
+COPY --chown=box assets/docs/README.app.md app/README.md
+COPY --chown=box assets/docs/README.ai.md ai/README.md
+COPY --chown=box assets/docs/README.info.md info/README.md
+COPY --chown=box assets/docs/README.data.md data/README.md
+COPY --chown=box assets/docs/README.local.md local/README.md
+COPY --chown=box assets/docs/README.misc.md misc/README.md
+
+# copy any sub-directory documents
+COPY --chown=box assets/docs/info/ENVIRONMENT.info.md info/ENVIRONMENT.md
 
 # copy nushell environment scripts
-COPY --chown=box assets/login.nu .config/nushell/
-COPY --chown=box assets/banner.nu .config/nushell/
-COPY --chown=box assets/config.nu .config/nushell/
+COPY --chown=box assets/nu/login.nu .config/nushell/
+COPY --chown=box assets/nu/banner.nu .config/nushell/
+COPY --chown=box assets/nu/config.nu .config/nushell/
 
 # configure glow: run it once to setup its `.config`, then edit the style
 RUN glow --version
 RUN sed -i'' 's/style: "auto"/style: "tokyo-night"/g' .config/glow/glow.yml
 
+# configure claude-code
+RUN claude -v
+COPY --chown=box assets/claude/settings.json .claude/
+COPY --chown=box assets/claude/CLAUDE.md .claude/
+
 # remove group,other permissions to everything in home
 RUN chmod -R go-rwx .
 
-# copy the two possible entrypoints: shell and ssh
-COPY --chmod=755 assets/entrypoint.nushell.sh /usr/local/bin/
-COPY --chmod=750 assets/entrypoint.sshd.sh /usr/local/bin/
-
-# run one of the entry points
+# = BEGIN USER ROOT =
 USER root
+WORKDIR /root
+
+# === SYSTEM IS READY ===
+
+# run as root: one of the entry points
 ENTRYPOINT ["/usr/local/bin/entrypoint.sshd.sh"]
+
+# debugging
 #ENTRYPOINT ["/usr/local/bin/entrypoint.nushell.sh"]

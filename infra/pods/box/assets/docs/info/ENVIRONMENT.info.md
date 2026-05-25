@@ -27,6 +27,7 @@ The following tools / packages are known to be implicitly available:
 - `python3` (aliased to `python`)
 
 The user's home directory is non-standard:
+- `~/ai`: Harnesses for AI agents
 - `~/app`: Installation path for self-created software 
   - `~/app/bin`: Executables
   - `~/app/lib`: Libraries, modules, includes, etc.
