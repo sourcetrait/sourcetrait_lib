@@ -16,8 +16,10 @@ The environment EDITOR is `helix`.
 
 The following tools / packages are explicitly available:
 - `nodejs` and `npm`
-- `rustup`, `cargo`, `rustc` 
+- `rustup`, `cargo`, `rustc`, `ast-grep`, `cargo-cache`, `rust-src`, `cargo-expand`, `rust-analyzer`, `+nightly` 
 - `nushell`
+- `python3-lxml`
+- `ripgrep`, `tokei`, `fd-find`, `tree-sitter-cli`, `tree-sitter`, `libtree-sitter`, `libtree-sitter-rust`
 
 All of the tools available to a `fedora-toolbox` container image are available.
 

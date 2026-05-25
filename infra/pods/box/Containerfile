@@ -6,7 +6,7 @@ RUN dnf -y upgrade
 COPY --chmod=0640 assets/gemfury-nushell.repo /etc/yum.repos.d/
 COPY --chmod=0640 assets/charm-glow.repo /etc/yum.repos.d/
 RUN dnf -y install nushell helix openssh-server openssl-devel nodejs24 npm \
-  glow ripgrep
+  glow ripgrep python3-lxml tokei fd-find tree-sitter-cli libtree-sitter-rust
 
 # required for ssh to work
 RUN chmod 640 /etc/shadow
@@ -44,7 +44,11 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="${PATH}:/home/box/sys/.cargo/bin"
 RUN rm .profile
 
+RUN rustup toolchain add nightly
+RUN rustup component add rust-src
+RUN rustup component add rust-analyzer
 RUN cargo install --locked cargo-cache
+RUN cargo install --locked ast-grep
 RUN cargo-cache -e
 
 # copy user directory readme files to their locations
