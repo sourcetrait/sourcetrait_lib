@@ -1,4 +1,5 @@
 #!/usr/bin/env nu
+# build script for the box containerfile
 
 # initialize podman and return an `app` object containing preloaded
 # configuration for the `pod.toml` and `user.toml` files

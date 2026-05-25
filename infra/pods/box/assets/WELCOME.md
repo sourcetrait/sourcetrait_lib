@@ -1,6 +1,8 @@
-# Welcome to Box!
+# Welcome to SourceTrait Box!
 
-Documentation is in `~/info`. Use the `glow` command to read markdown docs.
+The `~/info/ENVIRONMENT.md` file briefly describes this OS environment.
+
+The `glow` command is available to visualize markdown docs.
 
 Most top-level user directories have their own *README.md*.
 

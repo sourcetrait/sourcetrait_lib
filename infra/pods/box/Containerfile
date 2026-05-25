@@ -1,11 +1,12 @@
 FROM registry.fedoraproject.org/fedora-toolbox:latest
-LABEL name="sourcetrait/box" version="0.0.4"
+LABEL name="sourcetrait/box" version="0.0.5"
 RUN dnf -y upgrade
 
 # install repos
 COPY --chmod=0640 assets/gemfury-nushell.repo /etc/yum.repos.d/
 COPY --chmod=0640 assets/charm-glow.repo /etc/yum.repos.d/
-RUN dnf -y install nushell helix openssh-server openssl-devel glow
+RUN dnf -y install nushell helix openssh-server openssl-devel nodejs24 npm \
+  glow ripgrep
 
 # required for ssh to work
 RUN chmod 640 /etc/shadow
@@ -50,6 +51,7 @@ RUN cargo-cache -e
 COPY --chown=box assets/WELCOME.md ./
 COPY --chown=box assets/README.app.md app/README.md
 COPY --chown=box assets/README.info.md info/README.md
+COPY --chown=box assets/ENVIRONMENT.info.md info/ENVIRONMENT.md
 COPY --chown=box assets/README.data.md data/README.md
 COPY --chown=box assets/README.local.md local/README.md
 COPY --chown=box assets/README.misc.md misc/README.md
