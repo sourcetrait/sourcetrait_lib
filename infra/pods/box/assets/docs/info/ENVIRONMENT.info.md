@@ -20,6 +20,7 @@ The following tools / packages are explicitly available:
 - `nushell`
 - `python3-lxml`
 - `ripgrep`, `tokei`, `fd-find`, `tree-sitter-cli`, `tree-sitter`, `libtree-sitter`, `libtree-sitter-rust`
+- `jq`
 
 All of the tools available to a `fedora-toolbox` container image are available.
 

@@ -1,6 +1,6 @@
 [package]
 name = "sourcetrait_lib_note"
-version = "3.1.1"
+version = "0.0.1"
 edition = "2024"
 description = "A very simple Markdown notes manager"
 authors = ["SourceTrait <development@sourcetrait.com>"]
