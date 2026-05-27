@@ -7,8 +7,8 @@ def feature_claude [] {
     ^claude -v
     ^claude -p "exit" e>| ignore
     
-    mv /tmp/init/user/claude/CLAUDE.md .claude/
-    mv /tmp/init/user/claude/settings.json .claude/
+    mv /tmp/init/user/claude/CLAUDE.md ~/sys/.claude/
+    mv /tmp/init/user/claude/settings.json ~/sys/.claude/
     
     rm -rf ~/ai/tmp
 }

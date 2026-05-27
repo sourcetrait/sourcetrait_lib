@@ -1,3 +1,0 @@
-# SourceTrait Box
-
-Welcome!

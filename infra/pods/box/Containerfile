@@ -31,7 +31,7 @@ WORKDIR /home/box
 
 # our user directories take their own approach
 # many of the top-level ones have their own README.md
-RUN mkdir ai app data info local misc proj sys tmp
+RUN mkdir ai app data info local misc proj repos sys tmp
 RUN mkdir -p app/{bin,lib,share}
 RUN mkdir -p local/{bin,lib,etc,share,src}
 RUN mkdir -p sys/.xdg/{cache,data,state}
@@ -65,10 +65,13 @@ RUN cargo-cache -e
 COPY --chown=box assets/docs/WELCOME.md ./
 COPY --chown=box assets/docs/README.app.md app/README.md
 COPY --chown=box assets/docs/README.ai.md ai/README.md
-COPY --chown=box assets/docs/README.info.md info/README.md
 COPY --chown=box assets/docs/README.data.md data/README.md
+COPY --chown=box assets/docs/README.info.md info/README.md
 COPY --chown=box assets/docs/README.local.md local/README.md
 COPY --chown=box assets/docs/README.misc.md misc/README.md
+COPY --chown=box assets/docs/README.proj.md proj/README.md
+COPY --chown=box assets/docs/README.repos.md repos/README.md
+COPY --chown=box assets/docs/README.sys.md sys/README.md
 
 # copy any sub-directory documents
 COPY --chown=box assets/docs/info/ENVIRONMENT.info.md info/ENVIRONMENT.md
