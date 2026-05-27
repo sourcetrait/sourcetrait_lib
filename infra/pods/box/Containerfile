@@ -1,5 +1,6 @@
 FROM registry.fedoraproject.org/fedora-toolbox:latest
 LABEL name="sourcetrait/box" version="0.0.6"
+ARG box_features
 RUN dnf -y upgrade
 
 # install custom dnf repositories
@@ -19,9 +20,6 @@ RUN useradd -m -k /dev/null -s /usr/bin/nu box
 RUN echo "box:box" | chpasswd
 RUN echo "box ALL=(ALL) ALL" > /etc/sudoers.d/box
 RUN chmod 0440 /etc/sudoers.d/box
-
-# install proprietary package: claude-code
-npm install -g @anthropic-ai/claude-code
 
 # copy the two possible entrypoints: ssh (normal) and shell (debug)
 COPY --chmod=750 assets/entrypoint.sshd.sh /usr/local/bin/
@@ -84,17 +82,34 @@ COPY --chown=box assets/nu/config.nu .config/nushell/
 RUN glow --version
 RUN sed -i'' 's/style: "auto"/style: "tokyo-night"/g' .config/glow/glow.yml
 
-# configure claude-code
-RUN claude -v
-COPY --chown=box assets/claude/settings.json .claude/
-COPY --chown=box assets/claude/CLAUDE.md .claude/
+# = BEGIN USER ROOT =
+USER root
+WORKDIR /tmp/init
 
-# remove group,other permissions to everything in home
-RUN chmod -R go-rwx .
+# copy optional user assets for use by feature scripts
+COPY --chown=box assets/claude/settings.json /tmp/init/user/claude/
+COPY --chown=box assets/claude/CLAUDE.md /tmp/init/user/claude/
+
+# run feature setup as root
+RUN nu features_root.nu ${box_features}
+
+# = BEGIN USER BOX =
+USER box 
+WORKDIR /home/box
+
+# run feature setup as user
+RUN nu features_user.nu ${box_features}
 
 # = BEGIN USER ROOT =
 USER root
 WORKDIR /root
+
+# delete the init directory
+RUN rm -rf /tmp/init
+
+# cleanup of home ownership and permissions
+RUN chown -R box:box /home/box
+RUN chmod -R go-rwx /home/box 
 
 # === SYSTEM IS READY ===
 
