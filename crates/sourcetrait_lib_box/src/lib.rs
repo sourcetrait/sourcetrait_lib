@@ -22,6 +22,7 @@ pub use self::{
     control::{
         pull::*,
         ssh::*,
+        start::*,
     },
     error::*,
     inspect::{

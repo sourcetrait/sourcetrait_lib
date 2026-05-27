@@ -22,9 +22,24 @@ pub enum BoxError {
         src: String,
         code: i32,
     },
+    ContainerNotFound { container: String },
+    Command {
+        code: Option<i32>,
+        err: CommandErr,
+    },
+    ExecuteCommand {
+        source: io::Error,
+        err: CommandErr,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, snafu::Snafu)]
+pub enum CommandErr {
+    StartContainer {
+        name: String,
+    },
     Ssh {
         container: String,
-        source: io::Error,
     },
 }
 

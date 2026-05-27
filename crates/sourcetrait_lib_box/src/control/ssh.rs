@@ -2,7 +2,7 @@ use crate::*;
 
 #[derive(Debug)]
 pub struct SshOptions {
-    pub name: String,
+    pub container: String,
 }
 
 impl SshOptions {
@@ -13,8 +13,8 @@ impl SshOptions {
 const SSH: &'static str = "ssh";
 
 pub fn ssh(opts: SshOptions) -> BoxResult<()> {
-    let container = IsRunningOptions::Container { name: opts.name.to_string() };
-    if !is_running(container).is_ok_and(|r| r.as_bool()) {
+    let runopts = IsRunningOptions::Container { name: opts.container.clone() };
+    if !is_running(runopts).is_ok_and(|r| r.as_bool()) {
         todo!("not running :: todo: start container here");
     }
     
@@ -30,6 +30,9 @@ pub fn ssh(opts: SshOptions) -> BoxResult<()> {
 
     match err {
         None => Ok(()), 
-        Some(source) => Err(BoxError::Ssh { container: opts.name, source }),
+        Some(source) => Err(BoxError::ExecuteCommand {
+            source: source,
+            err: CommandErr::Ssh { container: opts.container },
+        }),
     }
 }
