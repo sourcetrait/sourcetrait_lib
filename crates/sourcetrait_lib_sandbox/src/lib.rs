@@ -7,30 +7,36 @@ pub(crate) mod control {
     pub(crate) mod stop;
     pub(crate) mod update;
 }
-pub(crate) mod consts;
-pub(crate) mod error;
+pub(crate) mod feature {
+    pub(crate) mod feature;
+}
 pub(crate) mod inspect {
-    pub mod is_running;
+    pub(crate) mod is_running;
 }
 pub(crate) mod model {
     pub(crate) mod pod_image;
 }
+pub(crate) mod consts;
+pub(crate) mod error;
 pub(crate) mod serde_json_ext;
 
 pub use self::{
-    consts::*,
     control::{
         pull::*,
         ssh::*,
         start::*,
     },
-    error::*,
+    feature::{
+        feature::*,
+    },
     inspect::{
         is_running::*,
     },
     model::{
         pod_image::*,
     },
+    consts::*,
+    error::*,
 };
 
 pub(crate) use self::{

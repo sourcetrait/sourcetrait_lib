@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-  "crates/sourcetrait_lib_box",
+  "crates/sourcetrait_lib_sandbox",
   "crates/sourcetrait_lib_note",
 ]
 

@@ -47,7 +47,7 @@ impl CommandExt for Command {
     }
 }
 
-pub fn is_running(opts: IsRunningOptions) -> BoxResult<IsRunning> {
+pub fn is_running(opts: IsRunningOptions) -> SandboxResult<IsRunning> {
     match opts {
         IsRunningOptions::Machine => {
             let mut cmd = Command::new(PODMAN);
@@ -57,7 +57,7 @@ pub fn is_running(opts: IsRunningOptions) -> BoxResult<IsRunning> {
                 Ok(_) => Ok(IsRunning::NotRunning),
                 Err(e) => {
                     dbg!(e);
-                    Err(BoxError::PodmanInfo { src: BOX_IMAGE_SOURCE.into(), code: 127 })
+                    Err(SandboxError::PodmanInfo { src: BOX_IMAGE_SOURCE.into(), code: 127 })
                 }
             }
         },
@@ -70,12 +70,12 @@ pub fn is_running(opts: IsRunningOptions) -> BoxResult<IsRunning> {
                     true => Ok(IsRunning::from_bool({
                         !output.stdout.trim_ascii().is_empty()
                     })),
-                    false => Err(BoxError::PodmanInfo {
+                    false => Err(SandboxError::PodmanInfo {
                         src: BOX_IMAGE_SOURCE.into(),
                         code: output.status.code().unwrap_or(127)
                     }),
                 },
-                _ => Err(BoxError::PodmanInfo { src: BOX_IMAGE_SOURCE.into(), code: 127 }),
+                _ => Err(SandboxError::PodmanInfo { src: BOX_IMAGE_SOURCE.into(), code: 127 }),
             }
         },
     }

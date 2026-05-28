@@ -1,5 +1,5 @@
 [package]
-name = "sourcetrait_lib_box"
+name = "sourcetrait_lib_sandbox"
 version = "0.0.1"
 edition = "2024"
 description = "Sandboxed command-line environments for data analytics scripting"

@@ -7,11 +7,11 @@ pub struct StartOptions {
     pub name: String,
 }
 
-pub fn start(opts: StartOptions) -> BoxResult<()> {
+pub fn start(opts: StartOptions) -> SandboxResult<()> {
     match is_running(IsRunningOptions::Container{ name: opts.name.clone() })? {
         IsRunning::NotRunning => {},
         IsRunning::Running => return Ok(()),
-        IsRunning::NotFound => return Err(BoxError::ContainerNotFound {
+        IsRunning::NotFound => return Err(SandboxError::ContainerNotFound {
             container: opts.name,
         }),
     }
@@ -21,11 +21,11 @@ pub fn start(opts: StartOptions) -> BoxResult<()> {
     cmd.args(&["start", opts.name.as_str()]);
     match cmd.status() {
         Ok(exit) if exit.success() => Ok(()), 
-        Ok(exit) => Err(BoxError::Command {
+        Ok(exit) => Err(SandboxError::Command {
             code: exit.code(),
             err: CommandErr::StartContainer { name: opts.name },
         }),
-        Err(source) => Err(BoxError::ExecuteCommand {
+        Err(source) => Err(SandboxError::ExecuteCommand {
             err: CommandErr::StartContainer { name: opts.name },
             source,
         }),

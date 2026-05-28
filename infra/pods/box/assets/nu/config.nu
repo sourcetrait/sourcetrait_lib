@@ -24,11 +24,7 @@ $env.CARGO_HOME = ($env.HOME | path join 'sys/.cargo')
 # setup rustup's env
 $env.RUSTUP_HOME = ($env.HOME | path join 'sys/.rustup')
 
-# (box feature: claude) claude's env and claude.json
-$env.CLAUDE_CONFIG_DIR = ($env.HOME | path join 'sys/.claude')
-
 # non-standard: secondary timezone, different than the system
 # eg, "America/Los_Angeles"
 # keeping the system timezone in UTC has its portability benefits
-# used primarily for the claude status-line
 $env.ALT_TZ = "UTC"

@@ -1,7 +1,9 @@
 use crate::*;
 
+pub type SandboxResult<T> = Result<T, SandboxError>;
+
 #[derive(Debug, snafu::Snafu)]
-pub enum BoxError {
+pub enum SandboxError {
     ParseSource {
         src: String,
         source: r::oci::ParseError,
@@ -49,4 +51,9 @@ pub enum ParseConfigErr {
     MissingLabel,
 }
 
-pub type BoxResult<T> = Result<T, BoxError>;
+
+impl From<SandboxError> for snafu::Whatever {
+    fn from(value: SandboxError) -> Self {
+        todo!()
+    }
+}

@@ -12,7 +12,7 @@ impl SshOptions {
 
 const SSH: &'static str = "ssh";
 
-pub fn ssh(opts: SshOptions) -> BoxResult<()> {
+pub fn ssh(opts: SshOptions) -> SandboxResult<()> {
     let runopts = IsRunningOptions::Container { name: opts.container.clone() };
     if !is_running(runopts).is_ok_and(|r| r.as_bool()) {
         todo!("not running :: todo: start container here");
@@ -30,7 +30,7 @@ pub fn ssh(opts: SshOptions) -> BoxResult<()> {
 
     match err {
         None => Ok(()), 
-        Some(source) => Err(BoxError::ExecuteCommand {
+        Some(source) => Err(SandboxError::ExecuteCommand {
             source: source,
             err: CommandErr::Ssh { container: opts.container },
         }),

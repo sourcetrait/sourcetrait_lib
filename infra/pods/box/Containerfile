@@ -1,6 +1,10 @@
 FROM registry.fedoraproject.org/fedora-toolbox:latest
 LABEL name="sourcetrait/box" version="0.0.6"
 ARG box_features
+
+USER root
+WORKDIR /tmp/init
+
 RUN dnf -y upgrade
 
 # install custom dnf repositories
@@ -40,6 +44,9 @@ RUN mkdir -p sys/.xdg/{cache,data,state}
 ENV XDG_CACHE_HOME "sys/.xdg/cache"
 ENV XDG_DATA_HOME "sys/.xdg/data"
 ENV XDG_STATE_HOME "sys/.xdg/state"
+
+# copy xdg user dirs settings
+COPY --chown=box assets/config/user-dirs.dirs ~/.config/ 
 
 # setup rustup's env
 ENV RUSTUP_HOME "sys/.rustup"
@@ -87,32 +94,43 @@ RUN sed -i'' 's/style: "auto"/style: "tokyo-night"/g' .config/glow/glow.yml
 
 # = BEGIN USER ROOT =
 USER root
-WORKDIR /tmp/init
+WORKDIR=/tmp/init
+RUN mkdir -p /tmp/init/user/claude
 
 # copy optional user assets for use by feature scripts
 COPY --chown=box assets/claude/settings.json /tmp/init/user/claude/
 COPY --chown=box assets/claude/CLAUDE.md /tmp/init/user/claude/
+COPY --chown=box assets/claude/statusline.bash /tmp/init/user/claude/
+
+# copy features scripts
+COPY --chown=root assets/features_root.nu /tmp/init/
+COPY --chown=root assets/features_user.nu /tmp/init/
 
 # run feature setup as root
-RUN nu features_root.nu ${box_features}
+RUN nu /tmp/init/features_root.nu ${box_features}
 
 # = BEGIN USER BOX =
 USER box 
 WORKDIR /home/box
 
 # run feature setup as user
-RUN nu features_user.nu ${box_features}
+RUN nu /tmp/init/features_user.nu ${box_features}
 
 # = BEGIN USER ROOT =
 USER root
 WORKDIR /root
 
-# delete the init directory
-RUN rm -rf /tmp/init
+# wipe the tmp directory 
+RUN rm -rf /tmp/*
+RUN rm -rf /tmp/.*
 
-# cleanup of home ownership and permissions
+# sanitize user home ownership and permissions
 RUN chown -R box:box /home/box
 RUN chmod -R go-rwx /home/box 
+
+# sanitize root home ownership and permissions
+RUN chown -R root:root /root
+RUN chmod -R go-rwx /root 
 
 # === SYSTEM IS READY ===
 
