@@ -14,7 +14,7 @@ COPY --chmod=0640 assets/repos/charm-glow.repo /etc/yum.repos.d/
 # install dnf packages
 RUN dnf -y install nushell helix openssh-server openssl-devel nodejs24 npm \
   glow ripgrep python3-lxml tokei fd-find tree-sitter-cli libtree-sitter-rust \
-  jq
+  jq git-lfs
 
 # required for ssh to work
 RUN chmod 640 /etc/shadow
