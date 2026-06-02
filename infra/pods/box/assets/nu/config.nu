@@ -1,17 +1,8 @@
-# do not use nushell's defualt banner; we have our own
-$env.config.show_banner = false
-
 # setup default env path to point at the app/bin and at cargo's bin
 $env.PATH = ($env.PATH | append [
   ($env.HOME | path join 'sys/.cargo/bin')
   ($env.HOME | path join 'app/bin')
 ])
-
-# enable full color support
-$env.COLORTERM = "truecolor"
-
-# defualt editor is helix
-$env.EDITOR = "hx"
 
 # xdg cache, data, state default to dirs within `~/sys/.xdg`
 $env.XDG_CACHE_HOME = ($env.HOME | path join 'sys/.xdg/cache')
@@ -24,7 +15,18 @@ $env.CARGO_HOME = ($env.HOME | path join 'sys/.cargo')
 # setup rustup's env
 $env.RUSTUP_HOME = ($env.HOME | path join 'sys/.rustup')
 
+# do not use nushell's defualt banner; we have our own
+$env.config.show_banner = false
+
+# enable full color support
+$env.COLORTERM = "truecolor"
+
+# defualt editor is helix
+$env.EDITOR = "hx"
+
 # non-standard: secondary timezone, different than the system
 # eg, "America/Los_Angeles"
 # keeping the system timezone in UTC has its portability benefits
 $env.ALT_TZ = "UTC"
+
+umask rwx------

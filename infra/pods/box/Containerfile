@@ -23,8 +23,7 @@ RUN chmod 640 /etc/shadow
 # add user with sudo
 RUN useradd -m -k /dev/null -s /usr/bin/nu box
 RUN echo "box:box" | chpasswd
-RUN echo "box ALL=(ALL) ALL" > /etc/sudoers.d/box
-RUN chmod 0440 /etc/sudoers.d/box
+COPY --chmod=440 assets/etc/sudoers.d/box /etc/sudoers.d/ 
 
 # copy the two possible entrypoints: ssh (normal) and shell (debug)
 COPY --chmod=750 assets/entrypoint.sshd.sh /usr/local/bin/
