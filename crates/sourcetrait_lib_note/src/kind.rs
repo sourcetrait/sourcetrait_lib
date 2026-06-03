@@ -72,7 +72,7 @@ impl Note {
         Self (note_type)
     }
     
-    pub fn from_filepath(notes_dir: &NotesDir, file: &Path) -> Result<Self> {
+    pub fn from_filepath(notes_dir: &NotesDir, file: &Path) -> NoteResult<Self> {
         let dir: &Path = notes_dir;
         let relpath = file.strip_prefix(dir)
             .map_err(|_| Error::InvalidNote(format!("File is not in the notes directory: {}", file.display())))?;

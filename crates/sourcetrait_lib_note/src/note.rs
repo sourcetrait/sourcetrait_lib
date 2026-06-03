@@ -75,8 +75,8 @@ pub fn note_for_topic(notes_dir: &NotesDir, note: &Note) -> Result<PathBuf> {
     assert!(note.kind() != NoteKind::Today);
     let topic = note.topic().expect("topical note");
     let date = Date::now();
-    let topic_title = topic.to_case(Case::Sentence);
-    let topic = topic.to_case(Case::Kebab);
+    let topic_title = topic.to_title_case();
+    let topic = topic.to_kebab_case();
     
     let note_dir = notes_dir.kind_dir(note.kind());
 

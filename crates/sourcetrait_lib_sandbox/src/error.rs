@@ -50,10 +50,3 @@ pub enum ParseConfigErr {
     Json(json::Error),
     MissingLabel,
 }
-
-
-impl From<SandboxError> for snafu::Whatever {
-    fn from(value: SandboxError) -> Self {
-        todo!()
-    }
-}

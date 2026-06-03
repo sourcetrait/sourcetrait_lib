@@ -12,16 +12,17 @@ keywords = ["sourcetrait", "lib", "note", "markdown"]
 
 [dependencies]
 chrono.workspace = true
-convert_case.workspace = true
 derive_builder.workspace = true
 dirs.workspace = true
+heck.workspace = true
 serde.workspace = true
 shellexpand.workspace = true
+snafu.workspace = true
 strum.workspace = true
-thiserror.workspace = true
 toml.workspace = true
 sourcetrait_chronox.workspace = true
 sourcetrait_tomlx.workspace = true
+sourcetrait_stdx.workspace = true
 
 [dev-dependencies]
 sourcetrait_testing.workspace = true

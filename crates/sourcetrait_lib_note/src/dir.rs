@@ -18,14 +18,19 @@ impl NotesDir {
         Self(dir)
     }
 
-    pub fn init(&self) -> Result<()> {
+    pub fn init(&self) -> NoteResult<()> {
         let notes_dir = &self.0;
         for kind in NoteKind::iter() {
             let dir_name: &'static str = kind.into();
             let kind_dir = notes_dir.join(dir_name);
             if !kind_dir.is_dir() {
                fs::create_dir_all(&kind_dir)
-                   .map_err(|e| Error::Io(format!("Unable to create note dir: {}", kind_dir.display()), e))?;
+                   .map_err(|source| NoteError::FileIO {
+                       source,
+                       noun: FileNoun::NoteDir,
+                       err: stdx::error::fs::FsErrMsg::CreateDir,
+                       path: notes_dir.to_path_buf(),
+                   });
             }
         }
 

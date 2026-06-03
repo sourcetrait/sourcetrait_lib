@@ -12,13 +12,13 @@ impl Date {
 
     /// Parse a string following either Y-m-d or Y/m/d formats, with year and
     /// month being optional.
-    pub fn from(&self, when: &str) -> Result<Self> {
+    pub fn from(&self, when: &str) -> NoteResult<Self> {
         if when == "yesterday" {
             Ok(Self(self.0 - Duration::days(1)))
         } else if let Some(date) = self.0.parse_relative_date(when) {
             Ok(Self(date))
         } else {
-            Err(Error::Date(when.to_string()))
+            Err(NoteError::When { when: when.to_string() })
         }
     }
 

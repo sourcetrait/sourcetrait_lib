@@ -15,6 +15,7 @@ pub(crate) use std::{
     str::FromStr
 };
 pub(crate) use chrono::{NaiveDate};
-pub(crate) use convert_case::{Case, Casing};
+pub(crate) use heck::{ToTitleCase,ToKebabCase};
 pub(crate) use sourcetrait_chronox::{self as chronox, DateTimeFormat};
 pub(crate) use sourcetrait_tomlx as tomlx;
+pub(crate) use sourcetrait_stdx as stdx;
