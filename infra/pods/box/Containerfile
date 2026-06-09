@@ -3,7 +3,15 @@ LABEL name="sourcetrait/box" version="0.0.6"
 ARG box_features
 
 USER root
+ENV HOME=/root
 WORKDIR /tmp/init
+
+# xdg cache, data, state live in dirs within `~/.sys/.xdg`
+ENV XDG_CACHE_HOME "$HOME/sys/.xdg/cache"
+ENV XDG_DATA_HOME "$HOME/sys/.xdg/data"
+ENV XDG_STATE_HOME "$HOME/sys/.xdg/state"
+
+RUN mkdir -p $HOME/sys/.xdg/{cache,data,state}
 
 RUN dnf -y upgrade
 
@@ -29,8 +37,12 @@ COPY --chmod=440 assets/etc/sudoers.d/box /etc/sudoers.d/
 COPY --chmod=750 assets/entrypoint.sshd.sh /usr/local/bin/
 COPY --chmod=755 assets/entrypoint.nushell.sh /usr/local/bin/
 
+# basic ENV setup at SSH login
+COPY --chmod=644 assets/etc/security/pam_env.conf /etc/security/
+
 # = BEGIN USER box =
 USER box
+ENV HOME=/home/box
 WORKDIR /home/box
 
 # our user directories take their own approach
@@ -40,25 +52,21 @@ RUN mkdir -p app/{bin,lib,share}
 RUN mkdir -p local/{bin,lib,etc,share,src}
 RUN mkdir -p sys/.xdg/{cache,data,state}
 
-# xdg cache, data, state live in dirs within `~/.sys/.xdg`
-ENV XDG_CACHE_HOME "sys/.xdg/cache"
-ENV XDG_DATA_HOME "sys/.xdg/data"
-ENV XDG_STATE_HOME "sys/.xdg/state"
-
 # copy xdg user dirs settings
-COPY --chown=box assets/config/user-dirs.dirs ~/.config/ 
+COPY --chown=box assets/config/user-dirs.dirs .config/ 
 
 # setup rustup's env
-ENV RUSTUP_HOME "sys/.rustup"
+ENV RUSTUP_HOME "$HOME/sys/.rustup"
 # setup cargo's env
-ENV CARGO_HOME "sys/.cargo"
+ENV CARGO_HOME "$HOME/sys/.cargo"
 
-# initialize nu in home
+# initialize nu in home. setup the autoload dir
 RUN nu -l -c banner
+RUN mkdir -p .config/nushell/autoload
 
 # install rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="${PATH}:/home/box/sys/.cargo/bin"
+ENV PATH="${PATH}:/$HOME/sys/.cargo/bin"
 RUN rm .profile
 
 RUN rustup toolchain add nightly
@@ -94,30 +102,24 @@ RUN sed -i'' 's/style: "auto"/style: "tokyo-night"/g' .config/glow/glow.yml
 
 # = BEGIN USER ROOT =
 USER root
+ENV HOME=/root
 WORKDIR=/tmp/init
-RUN mkdir -p /tmp/init/user/claude
+RUN mkdir -p /usr/local/share/box /usr/local/bin/box /usr/local/etc/box
 
-# copy optional user assets for use by feature scripts
-COPY --chown=box assets/claude/settings.json /tmp/init/user/claude/
-COPY --chown=box assets/claude/CLAUDE.md /tmp/init/user/claude/
-COPY --chown=box assets/claude/statusline.bash /tmp/init/user/claude/
+# copy boxing adiministrative tool 
+COPY --chown=root assets/bin/boxing.nu /usr/local/bin/box
+RUN chmod 755 /usr/local/bin/boxing.nu
+RUN ln -s /user/local/bin/boxing.nu /usr/local/bin/boxing
 
-# copy features scripts
-COPY --chown=root assets/features_root.nu /tmp/init/
-COPY --chown=root assets/features_user.nu /tmp/init/
+# setup empty box features config
+COPY assets/etc/box/features.toml /usr/local/etc/box/
 
-# run feature setup as root
-RUN nu /tmp/init/features_root.nu ${box_features}
+# copy optional user assets for use by feature scripts: claude-code
+RUN mkdir -p /usr/local/share/box/features/claude
+COPY assets/features/claude/settings.json /usr/local/share/box/features/claude/
+COPY assets/features/claude/CLAUDE.md /usr/local/share/box/features/claude/
+COPY assets/features/claude/statusline.bash /usr/local/share/box/features/claude/
 
-# = BEGIN USER BOX =
-USER box 
-WORKDIR /home/box
-
-# run feature setup as user
-RUN nu /tmp/init/features_user.nu ${box_features}
-
-# = BEGIN USER ROOT =
-USER root
 WORKDIR /root
 
 # wipe the tmp directory 

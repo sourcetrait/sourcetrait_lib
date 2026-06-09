@@ -1,6 +1,6 @@
 use crate::*;
 
-pub fn note_for_date(notes_dir: &NotesDir, note: &Note, from: Option<Date>) -> Result<PathBuf> {
+pub fn note_for_date(notes_dir: &NotesDir, note: &Note, from: Option<Date>) -> NoteResult<PathBuf> {
     assert!(note.kind() == NoteKind::Today);
     
     let date = note.date().expect("today note date");
