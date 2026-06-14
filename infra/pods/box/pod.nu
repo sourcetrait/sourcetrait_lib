@@ -2,10 +2,11 @@
 # build script for the box containerfile
 
 const DEFAULT_SSH_PORT = 21524
+const PLATES = [ "box", "empower" ]
 
 # initialize podman and return an `app` object containing preloaded
 # configuration for the `pod.toml` and `user.toml` files
-def init [logname: string] {
+def init [logname: string, plate: string] {
   let prelog = $"(ansi cyan)[($logname)](ansi reset)"
   let errlog = $"(ansi red)[($logname)] error:(ansi reset)"
   
@@ -45,15 +46,18 @@ def init [logname: string] {
   $app
 }
 
-# pulls the latest sourcetrait/box image
+# pulls the latest sourcetrait/box images
 def "main pull" [] {
-  let app = init "pull"
-  print $"($app.prelog) pulling (ansi green)($app.ref)(ansi reset) ..."
-  podman manifest rm $app.ref out+err>| ignore
-  podman rmi $app.ref out+err>| ignore
-  podman manifest create $app.ref
-  podman manifest add --all $app.ref docker://($app.ref)
-  print $"($app.prelog) (ansi green)done(ansi reset)"
+    for plate in $PLATES {
+        cd $plate
+        let app = init "pull" $plate
+        print $"($app.prelog) pulling (ansi green)($app.ref)(ansi reset) ..."
+        podman manifest rm $app.ref out+err>| ignore
+        podman rmi $app.ref out+err>| ignore
+        podman manifest create $app.ref
+        podman manifest add --all $app.ref docker://($app.ref)
+        print $"($app.prelog) (ansi green)done(ansi reset)"
+    }
 }
 
 def "main build" [] {

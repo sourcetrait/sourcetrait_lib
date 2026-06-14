@@ -1,6 +1,5 @@
 FROM registry.fedoraproject.org/fedora-toolbox:latest
 LABEL name="sourcetrait/box" version="0.0.6"
-ARG box_features
 
 USER root
 ENV HOME=/root

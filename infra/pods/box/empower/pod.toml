@@ -1,0 +1,4 @@
+repo = "ghcr.io"
+image = "sourcetrait/box/ai"
+tag = "latest"
+platforms = [ "linux/amd64", "linux/arm64" ]

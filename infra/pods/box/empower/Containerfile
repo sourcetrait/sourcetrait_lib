@@ -1,0 +1,26 @@
+FROM ghcr.io/sourcetrait/box:latest
+LABEL name="sourcetrait/box/ai" version="0.0.1"
+
+USER root
+ENV HOME=/root
+WORKDIR /tmp/init
+
+# copy optional user assets for use by feature scripts: claude-code
+RUN mkdir -p /usr/local/share/box/ai/claude
+COPY assets/features/claude/settings.json /usr/local/share/box/features/claude/
+COPY assets/features/claude/CLAUDE.md /usr/local/share/box/features/claude/
+COPY assets/features/claude/statusline.bash /usr/local/share/box/features/claude/
+
+WORKDIR /root
+
+# wipe the tmp directory 
+RUN rm -rf /tmp/*
+RUN rm -rf /tmp/.*
+
+# sanitize user home ownership and permissions
+RUN chown -R box:box /home/box
+RUN chmod -R go-rwx /home/box 
+
+# sanitize root home ownership and permissions
+RUN chown -R root:root /root
+RUN chmod -R go-rwx /root 
