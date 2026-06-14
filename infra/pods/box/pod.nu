@@ -4,11 +4,19 @@
 const DEFAULT_SSH_PORT = 21524
 const PLATES = [ "box", "empower" ]
 
+def prelog [name: string] {
+    $"(ansi cyan)[($name)](ansi reset)"
+}
+
+def errlog [name: string] {
+    $"(ansi red)[($name)] error:(ansi reset)"
+}
+
 # initialize podman and return an `app` object containing preloaded
 # configuration for the `pod.toml` and `user.toml` files
 def init [logname: string, plate: string] {
-  let prelog = $"(ansi cyan)[($logname)](ansi reset)"
-  let errlog = $"(ansi red)[($logname)] error:(ansi reset)"
+  let prelog = prelog $logname 
+  let errlog = errlog $logname 
   
   # start the machine if needed
   if (podman info | complete).exit_code != 0 {
@@ -16,12 +24,12 @@ def init [logname: string, plate: string] {
     podman machine start
   }
 
+  let arch = (podman machine info --format '{{.Host.Arch}}')
   let pod_toml = try { open pod.toml } catch {
     print -e $"($errlog) failed to read config: pod.toml"
   }
 
   let ref = $"($pod_toml.repo)/($pod_toml.image):($pod_toml.tag)"
-  let arch = (podman machine info --format '{{.Host.Arch}}')
   let host_platform = $"linux/($arch)"
   let version = open Containerfile | lines
     | parse 'LABEL name="{name}" version="{version}"'
@@ -61,33 +69,37 @@ def "main pull" [] {
 }
 
 def "main build" [] {
-  let app = init "pod/build"
-  print $"($app.prelog) building (ansi magenta)($app.host_platform)(ansi reset) ..."
-
-  podman kill $app.container out+err>| ignore
-
-  let image_id = (
-    podman build --platform $app.host_platform --manifest $app.ref .
-    | tee { print } | lines | last | str trim
-  )
-
-  podman tag $image_id localhost/($app.image):($app.version)
-  print $"($app.prelog) (ansi green)done(ansi reset)"
+    for plate in $PLATES {
+        cd $plate
+        let app = init "pod/build" $plate
+        print $"($app.prelog) building (ansi magenta)($app.host_platform)(ansi reset) ..."
+        
+        podman kill $app.container out+err>| ignore
+        
+        let image_id = (
+        podman build --platform $app.host_platform --manifest $app.ref .
+        | tee { print } | lines | last | str trim
+        )
+        
+        podman tag $image_id localhost/($app.image):($app.version)
+        print $"($app.prelog) (ansi green)done(ansi reset)"
+    }
 }
 
 # creates a new container
-def "main create" [container: string, force: bool = false] {
-  let app = init "pod/create"
-
-  if $force {
-      podman container rm $container out+err>| ignore
-  }
-
-  let ssh_port = claim_port $DEFAULT_SSH_PORT 
-  
-  podman create --name $container -p ($ssh_port):22 --pull=never localhost/($app.image):($app.version)
-  ssh-keygen -f ($nu.home-dir | path join '.ssh/known_hosts') -R $'[localhost]:($ssh_port)' err>| ignore
-  print $"($app.prelog) (ansi green)done(ansi reset)"
+def "main create" [plate: string, container: string, force: bool = false] {
+    cd $plate
+    let app = init "pod/create" $plate
+    
+    if $force {
+        podman container rm $container out+err>| ignore
+    }
+    
+    let ssh_port = claim_port $DEFAULT_SSH_PORT 
+    
+    podman create --name $container -p ($ssh_port):22 --pull=never localhost/($app.image):($app.version)
+    ssh-keygen -f ($nu.home-dir | path join '.ssh/known_hosts') -R $'[localhost]:($ssh_port)' err>| ignore
+    print $"($app.prelog) (ansi green)done(ansi reset)"
 }
 
 def box_running [container: string] {
@@ -142,52 +154,53 @@ def claim_port [start_port: int] {
 }
 
 def "main ssh" [container: string] {
-  let app = init "pod/ssh"
+    let ssh_port = container_ssh_port $container
 
-  let ssh_port = container_ssh_port $container
-
-  if not (box_running $container) {
-    print -n $"($app.prelog) starting (ansi magenta)($container)(ansi reset) ... "
-    start_box $container
-    print $"(ansi green)started(ansi reset)"
-  }
-
-  ssh ($container)@localhost -p $ssh_port
+    if not (box_running $container) {
+        print -n $"(prelog "ssh") starting (ansi magenta)($container)(ansi reset) ... "
+        start_box $container
+        print $"(ansi green)started(ansi reset)"
+    }
+    
+    ssh ($container)@localhost -p $ssh_port
 }
 
 def "main stop" [container: string] {
-  let app = init "pod/stop"
-  print -n $"($app.prelog) stopping (ansi magenta)($container)(ansi reset) ... "
-  stop_box $container
-  print $"(ansi green)stopped(ansi reset)"
+    let prelog = prelog "stop"
+    print -n $"($prelog) stopping (ansi magenta)($container)(ansi reset) ... "
+    stop_box $container
+    print $"(ansi green)stopped(ansi reset)"
 }
 
 def "main publish" [] {
-  let app = init "pod/publish"
+    for plate in $PLATES {
+        cd $plate
+        let app = init "pod/publish" $plate
+        
+        # login if needed
+        if (podman login --get-login $app.repo | complete).exit_code != 0 {
+            print $"($app.prelog) logging in to (ansi magenta)($app.repo)(ansi reset) ..."
+            podman login $app.repo
+        }
 
-  # login if needed
-  if (podman login --get-login $app.repo | complete).exit_code != 0 {
-    print $"($app.prelog) logging in to (ansi magenta)($app.repo)(ansi reset) ..."
-    podman login $app.repo
-  }
-
-  # build the local platform first so that we catch errors faster
-  print $"($app.prelog) building (ansi magenta)($app.host_platform)(ansi reset) ..."
-  podman build --platform $app.host_platform --manifest $app.ref .
-
-  # linux only: build everything else
-  if $nu.os-info.name == "linux" {
-    for platform in $app.platforms {
-      if $platform == $app.host_platform { continue }
-      print $"($app.prelog) building (ansi magenta)($platform)(ansi reset) ..."
-      podman build --platform $platform --manifest $app.ref .
+        # build the local platform first so that we catch errors faster
+        print $"($app.prelog) building (ansi magenta)($app.host_platform)(ansi reset) ..."
+        podman build --platform $app.host_platform --manifest $app.ref .
+        
+        # linux only: build everything else
+        if $nu.os-info.name == "linux" {
+            for platform in $app.platforms {
+            if $platform == $app.host_platform { continue }
+            print $"($app.prelog) building (ansi magenta)($platform)(ansi reset) ..."
+            podman build --platform $platform --manifest $app.ref .
+            }
+        }
+        
+        print $"($app.prelog) pushing to (ansi magenta)($app.repo)(ansi reset) ..."
+        podman manifest push --all $app.ref
     }
-  }
-
-  print $"($app.prelog) pushing to (ansi magenta)($app.repo)(ansi reset) ..."
-  podman manifest push --all $app.ref
-
-  print $"($app.prelog) (ansi green)done(ansi reset)"
+        
+    print $"(prelog "build") (ansi green)done(ansi reset)"
 }
 
 def main [] { help main }
