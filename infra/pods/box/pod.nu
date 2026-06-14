@@ -2,7 +2,7 @@
 # build script for the box containerfile
 
 const DEFAULT_SSH_PORT = 21524
-const PLATES = [ "box", "empower" ]
+const PLATES = [ "box", "empower" ] # parent layers must be ordered first
 
 def prelog [name: string] {
     $"(ansi cyan)[($name)](ansi reset)"
@@ -77,8 +77,9 @@ def "main build" [] {
         podman kill $app.container out+err>| ignore
         
         let image_id = (
-        podman build --platform $app.host_platform --manifest $app.ref .
-        | tee { print } | lines | last | str trim
+            podman build --build-arg BASE="localhost/sourcetrait/box:latest" --platform $app.host_platform --manifest $app.ref .
+                | tee { print }
+                | lines | last | str trim
         )
         
         podman tag $image_id localhost/($app.image):($app.version)
@@ -185,14 +186,14 @@ def "main publish" [] {
 
         # build the local platform first so that we catch errors faster
         print $"($app.prelog) building (ansi magenta)($app.host_platform)(ansi reset) ..."
-        podman build --platform $app.host_platform --manifest $app.ref .
+        podman build --build-arg BASE="ghcr.io/sourcetrait/box:latest" --platform $app.host_platform --manifest $app.ref .
         
         # linux only: build everything else
         if $nu.os-info.name == "linux" {
             for platform in $app.platforms {
-            if $platform == $app.host_platform { continue }
-            print $"($app.prelog) building (ansi magenta)($platform)(ansi reset) ..."
-            podman build --platform $platform --manifest $app.ref .
+                if $platform == $app.host_platform { continue }
+                print $"($app.prelog) building (ansi magenta)($platform)(ansi reset) ..."
+                podman build --build-arg BASE="ghcr.io/sourcetrait/box:latest" --platform $platform --manifest $app.ref .
             }
         }
         

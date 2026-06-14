@@ -1,5 +1,6 @@
-FROM ghcr.io/sourcetrait/box:latest
-LABEL name="sourcetrait/box/ai" version="0.0.1"
+ARG BASE="localhost/sourcetrait/box:latest"
+FROM ${BASE} 
+LABEL name="sourcetrait/box/empower" version="0.0.1"
 
 USER root
 ENV HOME=/root
