@@ -1,6 +1,8 @@
 #!/usr/bin/env nu
 # build script for the box containerfile
 
+const DEFAULT_SSH_PORT = 21524
+
 # initialize podman and return an `app` object containing preloaded
 # configuration for the `pod.toml` and `user.toml` files
 def init [logname: string] {
@@ -16,13 +18,16 @@ def init [logname: string] {
   let pod_toml = try { open pod.toml } catch {
     print -e $"($errlog) failed to read config: pod.toml"
   }
-  let user_toml = try { open user.toml } catch {
-    print -e $"($errlog) failed to read config: user.toml"
-  }
 
   let ref = $"($pod_toml.repo)/($pod_toml.image):($pod_toml.tag)"
   let arch = (podman machine info --format '{{.Host.Arch}}')
   let host_platform = $"linux/($arch)"
+  let version = open Containerfile | lines
+    | parse 'LABEL name="{name}" version="{version}"'
+    | where {|$l|
+        $l.name == $pod_toml.image 
+    }
+    | first | get version
 
   mut app = {
     prelog: $prelog,
@@ -31,16 +36,16 @@ def init [logname: string] {
     host_platform: $host_platform,
     repo: $pod_toml.repo,
     image: $pod_toml.image,
+    version: $version,
     ref: $ref,
     tag: $pod_toml.tag,
     platforms: $pod_toml.platforms,
-    container: $user_toml.container,
-    ssh_port: $user_toml.ssh_port,
   };
 
   $app
 }
 
+# pulls the latest sourcetrait/box image
 def "main pull" [] {
   let app = init "pull"
   print $"($app.prelog) pulling (ansi green)($app.ref)(ansi reset) ..."
@@ -62,45 +67,94 @@ def "main build" [] {
     | tee { print } | lines | last | str trim
   )
 
-  podman tag $image_id localhost/($app.image):local
-
-  podman container rm $app.container out+err>| ignore
-  podman create --name $app.container -p($app.ssh_port):22 --pull=never localhost/($app.image):local
-  ssh-keygen -f ($nu.home-dir | path join '.ssh/known_hosts') -R $'[localhost]:($app.ssh_port)' err>| ignore
-
+  podman tag $image_id localhost/($app.image):($app.version)
   print $"($app.prelog) (ansi green)done(ansi reset)"
 }
 
-def box_running [app: record] {
-  podman ps -q -f name=($app.container) | str trim | is-not-empty
+# creates a new container
+def "main create" [container: string, force: bool = false] {
+  let app = init "pod/create"
+
+  if $force {
+      podman container rm $container out+err>| ignore
+  }
+
+  let ssh_port = claim_port $DEFAULT_SSH_PORT 
+  
+  podman create --name $container -p ($ssh_port):22 --pull=never localhost/($app.image):($app.version)
+  ssh-keygen -f ($nu.home-dir | path join '.ssh/known_hosts') -R $'[localhost]:($ssh_port)' err>| ignore
+  print $"($app.prelog) (ansi green)done(ansi reset)"
 }
 
-def start_box [app: record] {
-  podman start $app.container | ignore
+def box_running [container: string] {
+  podman ps -q -f name=($container) | str trim | is-not-empty
 }
 
-def stop_box [app: record] {
-  if (box_running $app) {
-    podman stop $app.container out+err>| ignore
+def start_box [container: string] {
+  podman start $container | ignore
+}
+
+def stop_box [container: string] {
+  if (box_running $container) {
+    podman stop $container out+err>| ignore
   }
 }
 
-def "main ssh" [] {
+def container_ssh_port [container: string] {
+    podman inspect mycontainer
+        | from json
+        | get 0.NetworkSettings.Ports
+        | transpose container host
+        | where host != null
+        | each {|r| {
+            host: ($r.host | each {|b| $b.HostPort} | first | into int)
+            guest: ($r.container | split row "/" | first | into int)
+        }}
+        | where guest == 22
+        | first | get host
+}
+
+def ports_claimed [] {
+    let names = (podman ps -a --format '{{.Names}}' | lines)
+    podman inspect ...$names
+        | from json
+        | each {|c| $c.HostConfig.PortBindings | values }
+        | flatten
+        | flatten
+        | get HostPort
+        | each {|p| $p | into int }
+        | uniq
+        | sort
+}
+
+def claim_port [start_port: int] {
+    let claimed = (ports_claimed)
+    mut port = $start_port
+    while $port in $claimed {
+        $port = $port + 1
+    }
+    
+    $port
+}
+
+def "main ssh" [container: string] {
   let app = init "pod/ssh"
 
-  if not (box_running $app) {
-    print -n $"($app.prelog) starting (ansi magenta)($app.container)(ansi reset) ... "
-    start_box $app
+  let ssh_port = container_ssh_port $container
+
+  if not (box_running $container) {
+    print -n $"($app.prelog) starting (ansi magenta)($container)(ansi reset) ... "
+    start_box $container
     print $"(ansi green)started(ansi reset)"
   }
 
-  ssh box@localhost -p $app.ssh_port
+  ssh ($container)@localhost -p $ssh_port
 }
 
-def "main stop" [] {
+def "main stop" [container: string] {
   let app = init "pod/stop"
-  print -n $"($app.prelog) stopping (ansi magenta)($app.container)(ansi reset) ... "
-  stop_box $app
+  print -n $"($app.prelog) stopping (ansi magenta)($container)(ansi reset) ... "
+  stop_box $container
   print $"(ansi green)stopped(ansi reset)"
 }
 
