@@ -48,9 +48,9 @@ RUN mkdir -p $HOME/sys/.xdg/{cache,data,state}
 
 # our user directories take their own approach
 # many of the top-level ones have their own README.md
-RUN mkdir ai app data info local misc proj repos sys tmp
+RUN mkdir ai app data info misc proj repos sys tmp
 RUN mkdir -p app/{bin,lib,share}
-RUN mkdir -p local/{bin,lib,etc,share,src}
+RUN mkdir -p sys/local/{bin,lib,etc,share,src}
 RUN mkdir -p sys/.xdg/{cache,data,state}
 
 # copy xdg user dirs settings
@@ -86,13 +86,13 @@ COPY assets/docs/README.app.md app/README.md
 COPY assets/docs/README.ai.md ai/README.md
 COPY assets/docs/README.data.md data/README.md
 COPY assets/docs/README.info.md info/README.md
-COPY assets/docs/README.local.md local/README.md
 COPY assets/docs/README.misc.md misc/README.md
 COPY assets/docs/README.proj.md proj/README.md
 COPY assets/docs/README.repos.md repos/README.md
 COPY assets/docs/README.sys.md sys/README.md
 
 # copy any sub-directory documents
+COPY assets/docs/sys/README.local.md sys/local/README.md
 COPY assets/docs/info/ENVIRONMENT.info.md info/ENVIRONMENT.md
 
 # copy nushell environment scripts
@@ -109,7 +109,7 @@ USER root
 ENV HOME=/root
 WORKDIR /tmp
 
-RUN mkdir -p /usr/local/share/sourcetrait/box /usr/local/bin/sourcetrait/box /usr/local/etc/sourcetrait/box
+RUN mkdir -p /usr/local/{share/sourcetrait/box,bin/sourcetrait/box,etc/sourcetrait/box}
 
 # copy boxing administrative tool 
 COPY --chmod=755 assets/bin/boxing.nu /usr/local/bin/sourcetrait/box

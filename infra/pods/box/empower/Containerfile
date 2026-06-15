@@ -4,24 +4,14 @@ LABEL name="sourcetrait/box/empower" version="0.0.1"
 
 USER root
 ENV HOME=/root
-WORKDIR /tmp/init
+WORKDIR /tmp
 
-# copy optional user assets for use by feature scripts: claude-code
+npm install -g @anthropic-ai/claude-code
+# copy assets
 RUN mkdir -p /usr/local/share/box/ai/claude
-COPY assets/features/claude/settings.json /usr/local/share/box/features/claude/
-COPY assets/features/claude/CLAUDE.md /usr/local/share/box/features/claude/
-COPY assets/features/claude/statusline.bash /usr/local/share/box/features/claude/
+COPY --chmod=644 assets/claude/settings.json /usr/local/share/box/features/claude/
+COPY --chmod=644 assets/claude/CLAUDE.md /usr/local/share/box/features/claude/
+COPY --chmod-644 assets/claude/statusline.bash /usr/local/share/box/features/claude/
 
 WORKDIR /root
 
-# wipe the tmp directory 
-RUN rm -rf /tmp/*
-RUN rm -rf /tmp/.*
-
-# sanitize user home ownership and permissions
-RUN chown -R box:box /home/box
-RUN chmod -R go-rwx /home/box 
-
-# sanitize root home ownership and permissions
-RUN chown -R root:root /root
-RUN chmod -R go-rwx /root 
