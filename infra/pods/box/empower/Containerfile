@@ -6,12 +6,39 @@ USER root
 ENV HOME=/root
 WORKDIR /tmp
 
-npm install -g @anthropic-ai/claude-code
-# copy assets
-RUN mkdir -p /usr/local/share/box/ai/claude
-COPY --chmod=644 assets/claude/settings.json /usr/local/share/box/features/claude/
-COPY --chmod=644 assets/claude/CLAUDE.md /usr/local/share/box/features/claude/
-COPY --chmod-644 assets/claude/statusline.bash /usr/local/share/box/features/claude/
+# install empower package via copr
+RUN dnf -y copr enable sourcetrait/empower 
+RUN dnf -y update
 
+# install claude-code via npm
+npm install -g @anthropic-ai/claude-code
+
+USER box 
+ENV HOME=/home/box
+WORKDIR /tmp
+
+# install claude env autoload
+COPY --chmod=600 assets/nu/config.claude.nu /home/box/.config/nushell/autoload/
+
+# copy claude assets from empower
+RUN << EOF
+set -eu
+mkdir -p /home/box/sys/.claude
+cp /usr/local/share/sourcetrait/empower/claude/settings.json /home/box/sys/.claude/ 
+cp /usr/local/share/sourcetrait/empower/claude/CLAUDE.md /home/box/sys/.claude/ 
+EOF
+
+USER root
+ENV HOME=/root
 WORKDIR /root
 
+# wipe /tmp, santize access for /root and /home/box
+RUN << EOF
+set -eu
+rm -rf /tmp/*
+rm -rf /tmp/.*
+chown -R box:box /home/box
+chmod -R go-rwx /home/box 
+chown -R root:root /root
+chmod -R go-rwx /root 
+EOF

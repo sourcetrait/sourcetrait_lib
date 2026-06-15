@@ -2,17 +2,31 @@
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
+  "skipDangerousModePermissionPrompt": true,
   "permissions": {
     "defaultMode": "bypassPermissions"
   },
-  "skipDangerousModePermissionPrompt": true,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/local/bin/sourcetrait/empower/no.bash"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash /usr/local/bin/sourcetrait/empower/statusline.bash"
+  },
   "enabledPlugins": {
     "rust-analyzer-lsp@claude-plugins-official": true
   },
-  "effortLevel": "xhigh",
   "theme": "dark",
-  "statusLine": {
-    "type": "command",
-    "command": "/home/box/.claude/scripts/statusline.bash"
-  }
+  "effortLevel": "xhigh",
+  "model": "opus[1m]"
 }

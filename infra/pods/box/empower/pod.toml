@@ -1,4 +1,4 @@
 repo = "ghcr.io"
-image = "sourcetrait/box/ai"
+image = "sourcetrait/box/empower"
 tag = "latest"
 platforms = [ "linux/amd64", "linux/arm64" ]
