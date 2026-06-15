@@ -117,17 +117,16 @@ RUN ln -s /usr/local/bin/sourcetrait/box/boxing.nu /usr/local/bin/boxing
 
 WORKDIR /root
 
-# wipe the tmp directory 
-RUN rm -rf /tmp/*
-RUN rm -rf /tmp/.*
-
-# sanitize user home ownership and permissions
-RUN chown -R box:box /home/box
-RUN chmod -R go-rwx /home/box 
-
-# sanitize root home ownership and permissions
-RUN chown -R root:root /root
-RUN chmod -R go-rwx /root 
+# wipe /tmp, santize access for /root and /home/box
+RUN << EOF
+set -eu
+rm -rf /tmp/*
+rm -rf /tmp/.*
+chown -R box:box /home/box
+chmod -R go-rwx /home/box 
+chown -R root:root /root
+chmod -R go-rwx /root 
+EOF
 
 # === SYSTEM IS READY ===
 
