@@ -51,4 +51,9 @@ $env.COLORTERM = "truecolor"
 # defualt editor is helix
 $env.EDITOR = "hx"
 
+# non-standard: secondary timezone, different than the system
+# eg, "America/Los_Angeles"
+# keeping the system timezone in UTC has its portability benefits
+$env.ALT_TZ = "UTC"
+
 umask rwx------
