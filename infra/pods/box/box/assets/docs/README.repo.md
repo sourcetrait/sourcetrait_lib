@@ -1,2 +1,2 @@
-# ~/proj Repositories 
+# ~/repo Repositories 
 *Third-party repositories*

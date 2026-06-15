@@ -29,15 +29,16 @@ The following tools / packages are known to be implicitly available:
 
 The user's home directory is non-standard:
 - `~/ai`: Harnesses for AI agents
-- `~/app`: Installation path for self-created software not covered by another `$env.PATH`
-  - `~/app/bin`: Executables
-  - `~/app/lib`: Libraries, modules, includes, etc.
-  - `~/app/share`: Assets
 - `~/data`: Data files, dumps, etc.
 - `~/info`: Documentation, notes, etc.
 - `~/misc`: Files that don't fit anywhere else
 - `~/proj`: Projects and project repositories
+- `~/repo`: Third-party repositories
 - `~/sys`: User-level system configuration
+  - `~/sys/app`: Installation path for first-party software not covered by another `$env.PATH`
+    - `~/sys/app/bin`: Executables
+    - `~/sys/app/lib`: Libraries, modules, includes, etc.
+    - `~/sys/app/share`: Assets
   - `~/sys/local`: Installation path for manually installed third-party software
 - `~/tmp`: User-level temporary directory
 

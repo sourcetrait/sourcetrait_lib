@@ -1,3 +1,9 @@
+##
+# We attempt to keep dot-files out of ~/ and place them in ~/sys.
+# For software that doesn't adhere to the XDG spec, we typically don't
+# force them to; we just let them "be bad" in ~/sys.
+##
+
 # setup default env path to point at the app/bin and at cargo's bin
 $env.PATH = ($env.PATH | append [
   ($env.HOME | path join 'sys/local/bin')
@@ -10,6 +16,13 @@ $env.PATH = ($env.PATH | append [
 $env.XDG_CACHE_HOME = ($env.HOME | path join 'sys/.xdg/cache')
 $env.XDG_DATA_HOME = ($env.HOME | path join 'sys/.xdg/data')
 $env.XDG_STATE_HOME = ($env.HOME | path join 'sys/.xdg/state')
+# our own concept here: mirrored out ({cache,data,home}) with requirements:
+# - chown user:user
+# - chmod go-rwx
+$env.XDGX_PRIVATE_HOME = ($env.HOME | path join 'sys/.xdg/private')
+
+# setup git's env
+$env.GIT_CONFIG_GLOBAL = ($env.HOME | path join 'sys/.gitconfig')
 
 # setup cargo's env
 $env.CARGO_HOME = ($env.HOME | path join 'sys/.cargo')

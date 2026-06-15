@@ -9,8 +9,9 @@ WORKDIR /tmp
 ENV XDG_CACHE_HOME="$HOME/sys/.xdg/cache"
 ENV XDG_DATA_HOME="$HOME/sys/.xdg/data"
 ENV XDG_STATE_HOME="$HOME/sys/.xdg/state"
+ENV XDGX_PRIVATE_HOME="$HOME/sys/.xdg/private"
 
-RUN mkdir -p $HOME/sys/.xdg/{cache,data,state}
+RUN mkdir -p $HOME/sys/.xdg/{cache,data,state} $HOME/sys/.xdg/private/{cache,data,state}
 
 RUN dnf -y upgrade
 
@@ -44,14 +45,13 @@ USER box
 ENV HOME=/home/box
 WORKDIR /home/box
 
-RUN mkdir -p $HOME/sys/.xdg/{cache,data,state}
+RUN mkdir -p $HOME/sys/.xdg/{cache,data,state} $HOME/sys/.xdg/private/{cache,data,state}
 
 # our user directories take their own approach
 # many of the top-level ones have their own README.md
 RUN mkdir ai app data info misc proj repos sys tmp
-RUN mkdir -p app/{bin,lib,share}
+RUN mkdir -p sys/app/{bin,lib,share}
 RUN mkdir -p sys/local/{bin,lib,etc,share,src}
-RUN mkdir -p sys/.xdg/{cache,data,state}
 
 # copy xdg user dirs settings
 COPY assets/config/user-dirs.dirs .config/ 
@@ -82,7 +82,6 @@ RUN mkdir -p $CARGO_HOME/{registry,git}
 
 # copy user directory readme files to their locations
 COPY assets/docs/WELCOME.md ./
-COPY assets/docs/README.app.md app/README.md
 COPY assets/docs/README.ai.md ai/README.md
 COPY assets/docs/README.data.md data/README.md
 COPY assets/docs/README.info.md info/README.md
@@ -92,6 +91,7 @@ COPY assets/docs/README.repos.md repos/README.md
 COPY assets/docs/README.sys.md sys/README.md
 
 # copy any sub-directory documents
+COPY assets/docs/sys/README.app.md sys/app/README.md
 COPY assets/docs/sys/README.local.md sys/local/README.md
 COPY assets/docs/info/ENVIRONMENT.info.md info/ENVIRONMENT.md
 
