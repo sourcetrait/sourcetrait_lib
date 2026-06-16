@@ -49,7 +49,7 @@ RUN mkdir -p $HOME/sys/.xdg/{cache,data,state} $HOME/sys/.xdg/private/{cache,dat
 
 # our user directories take their own approach
 # many of the top-level ones have their own README.md
-RUN mkdir ai app data info misc proj repos sys tmp
+RUN mkdir ai data info misc proj repo sys tmp
 RUN mkdir -p sys/app/{bin,lib,share}
 RUN mkdir -p sys/local/{bin,lib,etc,share,src}
 
