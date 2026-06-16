@@ -49,7 +49,7 @@ RUN mkdir -p $HOME/.sys/.xdg/{cache,data,state} $HOME/.sys/.xdg/private/{cache,d
 
 # our user directories take their own approach
 # many of the top-level ones have their own README.md
-RUN mkdir ai back data info media proj repo sync .sys tmp xtra
+RUN mkdir ai back data info media net proj repo sync .sys tmp xtra
 RUN mkdir -p media/{image,video,audio,screen,scan}
 RUN mkdir -p tmp/down
 RUN mkdir -p .sys/app/{bin,lib,share}
@@ -89,6 +89,7 @@ COPY assets/docs/README.back.md back/README.md
 COPY assets/docs/README.data.md data/README.md
 COPY assets/docs/README.info.md info/README.md
 COPY assets/docs/README.media.md media/README.md
+COPY assets/docs/README.net.md net/README.md
 COPY assets/docs/README.proj.md proj/README.md
 COPY assets/docs/README.repo.md repo/README.md
 COPY assets/docs/README.sync.md sync/README.md
@@ -96,9 +97,9 @@ COPY assets/docs/README.sys.md .sys/README.md
 COPY assets/docs/README.xtra.md xtra/README.md
 
 # copy any sub-directory documents
+COPY assets/docs/info/ENVIRONMENT.info.md info/ENVIRONMENT.md
 COPY assets/docs/.sys/README.app.md .sys/app/README.md
 COPY assets/docs/.sys/README.local.md .sys/local/README.md
-COPY assets/docs/info/ENVIRONMENT.info.md info/ENVIRONMENT.md
 
 # copy nushell environment scripts
 COPY assets/nu/login.nu .config/nushell/

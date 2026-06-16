@@ -14,6 +14,7 @@ The user's home directory is non-standard:
 - `~/data`: Data files, dumps, etc.
 - `~/info`: Documents, notes, etc.
 - `~/media`: Audio, image, video
+- `~/net`: Network shared directories 
 - `~/proj`: Projects and project repositories
 - `~/repo`: Third-party repositories
 - `~/sync`: Home synchronization repository
