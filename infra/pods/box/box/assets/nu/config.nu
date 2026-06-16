@@ -9,7 +9,7 @@ $env.PATH = ($env.PATH | append [
   ($env.HOME | path join 'sys/local/bin')
   ($env.HOME | path join 'sys/.cargo/bin')
   ($env.HOME | path join 'sys/.python/bin')
-  ($env.HOME | path join 'app/bin')
+  ($env.HOME | path join 'sys/app/bin')
 ])
 
 # xdg cache, data, state default to dirs within `~/sys/.xdg`
