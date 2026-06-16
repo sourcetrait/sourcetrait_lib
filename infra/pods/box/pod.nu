@@ -71,36 +71,48 @@ def "main pull" [] {
 def "main build" [] {
     for plate in $PLATES {
         cd $plate
-        let app = init "pod/build" $plate
-        print $"($app.prelog) building (ansi magenta)($app.host_platform)(ansi reset) ..."
+        let cfg = init "pod/build" $plate
+        print $"($cfg.prelog) building (ansi magenta)($cfg.host_platform)(ansi reset) ..."
         
-        podman kill $app.container out+err>| ignore
+        podman kill $cfg.container out+err>| ignore
         
         let image_id = (
-            podman build --build-arg BASE="localhost/sourcetrait/box:latest" --platform $app.host_platform --manifest $app.ref .
+            podman build --build-arg BASE="localhost/sourcetrait/box:latest" --platform $cfg.host_platform --manifest $cfg.ref .
                 | tee { print }
                 | lines | last | str trim
         )
         
-        podman tag $image_id localhost/($app.image):($app.version)
-        print $"($app.prelog) (ansi green)done(ansi reset)"
+        podman tag $image_id localhost/($cfg.image):($cfg.version)
+        podman tag $image_id localhost/($cfg.image):latest
+        
+        print $"($cfg.prelog) (ansi green)done(ansi reset)"
     }
 }
 
 # creates a new container
-def "main create" [plate: string, container: string, force: bool = false] {
+def "main create" [container: string, plate: string, force: bool = false] {
     cd $plate
-    let app = init "pod/create" $plate
+    let cfg = init "pod/create" $plate
     
     if $force {
         podman container rm $container out+err>| ignore
     }
     
     let ssh_port = claim_port $DEFAULT_SSH_PORT 
+
+    # doesn't work due to uid: --tmpfs "/run/user/1000:rw,mode=0700,uid=1000,gid=1000,size=64m"
+    let args = [
+        --name $container
+        -p $"($ssh_port):22"
+        --volume $"($container)_home:/home/box"
+        --pull=never
+        $"localhost/($cfg.image):($cfg.version)"
+    ]
+    podman create ...$args
     
-    podman create --name $container -p ($ssh_port):22 --pull=never localhost/($app.image):($app.version)
     ssh-keygen -f ($nu.home-dir | path join '.ssh/known_hosts') -R $'[localhost]:($ssh_port)' err>| ignore
-    print $"($app.prelog) (ansi green)done(ansi reset)"
+    
+    print $"($cfg.prelog) (ansi green)done(ansi reset)"
 }
 
 def box_running [container: string] {

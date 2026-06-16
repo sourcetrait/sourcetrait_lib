@@ -1,4 +1,4 @@
-ARG BASE="localhost/sourcetrait/box:latest"
+ARG BASE="ghcr.io/sourcetrait/box:latest"
 FROM ${BASE} 
 LABEL name="sourcetrait/box/empower" version="0.0.1"
 
@@ -7,8 +7,9 @@ ENV HOME=/root
 WORKDIR /tmp
 
 # install empower package via copr
-RUN dnf -y copr enable sourcetrait/empower 
+RUN dnf -y copr enable sourcetrait/ai 
 RUN dnf -y update
+RUN dnf -y install sourcetrait_ai_empower
 
 # install claude-code via npm
 npm install -g @anthropic-ai/claude-code
