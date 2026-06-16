@@ -10,12 +10,16 @@ The environment EDITOR is `helix`.
 
 The user's home directory is non-standard:
 - `~/ai`: Harnesses for AI agents
+- `~/back`: Adhoc and scheduled backups 
 - `~/data`: Data files, dumps, etc.
-- `~/info`: Documentation, notes, etc.
-- `~/misc`: Files that don't fit anywhere else
+- `~/info`: Documents, notes, etc.
+- `~/media`: Audio, image, video
 - `~/proj`: Projects and project repositories
 - `~/repo`: Third-party repositories
+- `~/sync`: Home synchronization repository
 - `~/tmp`: User-level temporary directory
+  - `~/tmp/down`: Downloads 
+- `~/xtra`: Files that don't fit anywhere else
 
 Special directories:
 - `~/.config` Normal software configuration

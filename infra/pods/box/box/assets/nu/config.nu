@@ -12,7 +12,7 @@ $env.PATH = ($env.PATH | append [
   ($env.HOME | path join '.sys/app/bin')
 ])
 
-# xdg cache, data, state default to dirs within `~/sys/.xdg`
+# xdg cache, data, state default to dirs within `~/.sys/.xdg`
 $env.XDG_CACHE_HOME = ($env.HOME | path join '.sys/.xdg/cache')
 $env.XDG_DATA_HOME = ($env.HOME | path join '.sys/.xdg/data')
 $env.XDG_STATE_HOME = ($env.HOME | path join '.sys/.xdg/state')

@@ -49,7 +49,9 @@ RUN mkdir -p $HOME/.sys/.xdg/{cache,data,state} $HOME/.sys/.xdg/private/{cache,d
 
 # our user directories take their own approach
 # many of the top-level ones have their own README.md
-RUN mkdir ai data info misc proj repo .sys tmp
+RUN mkdir ai back data info media proj repo sync .sys tmp xtra
+RUN mkdir -p media/{image,video,audio,screen,scan}
+RUN mkdir -p tmp/down
 RUN mkdir -p .sys/app/{bin,lib,share}
 RUN mkdir -p .sys/local/{bin,lib,etc,share,src}
 
@@ -83,12 +85,15 @@ RUN mkdir -p $CARGO_HOME/{registry,git}
 # copy user directory readme files to their locations
 COPY assets/docs/WELCOME.md ./
 COPY assets/docs/README.ai.md ai/README.md
+COPY assets/docs/README.back.md back/README.md
 COPY assets/docs/README.data.md data/README.md
 COPY assets/docs/README.info.md info/README.md
-COPY assets/docs/README.misc.md misc/README.md
+COPY assets/docs/README.media.md media/README.md
 COPY assets/docs/README.proj.md proj/README.md
-COPY assets/docs/README.repos.md repos/README.md
+COPY assets/docs/README.repo.md repo/README.md
+COPY assets/docs/README.sync.md sync/README.md
 COPY assets/docs/README.sys.md .sys/README.md
+COPY assets/docs/README.xtra.md xtra/README.md
 
 # copy any sub-directory documents
 COPY assets/docs/.sys/README.app.md .sys/app/README.md
