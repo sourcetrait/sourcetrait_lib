@@ -6,12 +6,12 @@ ENV HOME=/root
 WORKDIR /tmp
 
 # xdg cache, data, state live in dirs within `~/.sys/.xdg`
-ENV XDG_CACHE_HOME="$HOME/sys/.xdg/cache"
-ENV XDG_DATA_HOME="$HOME/sys/.xdg/data"
-ENV XDG_STATE_HOME="$HOME/sys/.xdg/state"
-ENV XDGX_PRIVATE_HOME="$HOME/sys/.xdg/private"
+ENV XDG_CACHE_HOME="$HOME/.sys/.xdg/cache"
+ENV XDG_DATA_HOME="$HOME/.sys/.xdg/data"
+ENV XDG_STATE_HOME="$HOME/.sys/.xdg/state"
+ENV XDGX_PRIVATE_HOME="$HOME/.sys/.xdg/private"
 
-RUN mkdir -p $HOME/sys/.xdg/{cache,data,state} $HOME/sys/.xdg/private/{cache,data,state}
+RUN mkdir -p $HOME/.sys/.xdg/{cache,data,state} $HOME/.sys/.xdg/private/{cache,data,state}
 
 RUN dnf -y upgrade
 
@@ -45,30 +45,30 @@ USER box
 ENV HOME=/home/box
 WORKDIR /home/box
 
-RUN mkdir -p $HOME/sys/.xdg/{cache,data,state} $HOME/sys/.xdg/private/{cache,data,state}
+RUN mkdir -p $HOME/.sys/.xdg/{cache,data,state} $HOME/.sys/.xdg/private/{cache,data,state}
 
 # our user directories take their own approach
 # many of the top-level ones have their own README.md
-RUN mkdir ai data info misc proj repo sys tmp
-RUN mkdir -p sys/app/{bin,lib,share}
-RUN mkdir -p sys/local/{bin,lib,etc,share,src}
+RUN mkdir ai data info misc proj repo .sys tmp
+RUN mkdir -p .sys/app/{bin,lib,share}
+RUN mkdir -p .sys/local/{bin,lib,etc,share,src}
 
 # copy xdg user dirs settings
 COPY assets/config/user-dirs.dirs .config/ 
 
 # setup rustup's env
-ENV RUSTUP_HOME="$HOME/sys/.rustup"
+ENV RUSTUP_HOME="$HOME/.sys/.rustup"
 # setup cargo's env
-ENV CARGO_HOME="$HOME/sys/.cargo"
-ENV PATH="${PATH}:$HOME/sys/.cargo/bin"
+ENV CARGO_HOME="$HOME/.sys/.cargo"
+ENV PATH="${PATH}:$HOME/.sys/.cargo/bin"
 
 # initialize nu in home. setup the autoload dir
 RUN nu -l -c banner
 RUN mkdir -p .config/nushell/autoload
 
 # install and setup rust as a user-maintained tool
-RUN --mount=type=cache,target=/home/box/sys/.cargo/registry \
-    --mount=type=cache,target=/home/box/sys/.cargo/git << EOF
+RUN --mount=type=cache,target=/home/box/.sys/.cargo/registry \
+    --mount=type=cache,target=/home/box/.sys/.cargo/git << EOF
 set -eu
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
     | sh -s -- -y --no-modify-path --profile minimal --default-toolchain stable \
@@ -88,11 +88,11 @@ COPY assets/docs/README.info.md info/README.md
 COPY assets/docs/README.misc.md misc/README.md
 COPY assets/docs/README.proj.md proj/README.md
 COPY assets/docs/README.repos.md repos/README.md
-COPY assets/docs/README.sys.md sys/README.md
+COPY assets/docs/README.sys.md .sys/README.md
 
 # copy any sub-directory documents
-COPY assets/docs/sys/README.app.md sys/app/README.md
-COPY assets/docs/sys/README.local.md sys/local/README.md
+COPY assets/docs/.sys/README.app.md .sys/app/README.md
+COPY assets/docs/.sys/README.local.md .sys/local/README.md
 COPY assets/docs/info/ENVIRONMENT.info.md info/ENVIRONMENT.md
 
 # copy nushell environment scripts
