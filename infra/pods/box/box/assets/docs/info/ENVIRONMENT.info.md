@@ -12,8 +12,9 @@ The user's home directory is non-standard:
 - `~/ai`: Harnesses for AI agents
 - `~/back`: Adhoc and scheduled backups 
 - `~/data`: Data files, dumps, etc.
+- `~/file`: Filing system repositories 
 - `~/info`: Documents, notes, etc.
-- `~/media`: Audio, image, video
+- `~/mix`: Media files; Audio, image, video
 - `~/net`: Network shared directories 
 - `~/proj`: Projects and project repositories
 - `~/repo`: Third-party repositories
@@ -36,4 +37,4 @@ The following tools / packages are additionally available:
 - `nodejs` `npm` `rustup` `cargo` `ast-grep` `cargo-cache` `rust-src`
 - `cargo-expand`, `rust-analyzer` `rust +nightly` `nushell` `python3-lxml`
 - `ripgrep` `tokei` `fd-find` `tree-sitter-cli` `tree-sitter` `libtree-sitter`
-- `libtree-sitter-rust` `jq` `git-lfs` `yazi`
+- `libtree-sitter-rust` `jq` `glow` `git-lfs` `yazi`

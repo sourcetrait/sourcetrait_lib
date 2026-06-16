@@ -49,8 +49,8 @@ RUN mkdir -p $HOME/.sys/.xdg/{cache,data,state} $HOME/.sys/.xdg/private/{cache,d
 
 # our user directories take their own approach
 # many of the top-level ones have their own README.md
-RUN mkdir ai back data info media net proj repo sync .sys tmp xtra
-RUN mkdir -p media/{image,video,audio,screen,scan}
+RUN mkdir ai back data file info mix net proj repo sync .sys tmp xtra
+RUN mkdir -p mix/{image,video,audio,screen,scan}
 RUN mkdir -p tmp/down
 RUN mkdir -p .sys/app/{bin,lib,share}
 RUN mkdir -p .sys/local/{bin,lib,etc,share,src}
@@ -87,8 +87,9 @@ COPY assets/docs/WELCOME.md ./
 COPY assets/docs/README.ai.md ai/README.md
 COPY assets/docs/README.back.md back/README.md
 COPY assets/docs/README.data.md data/README.md
+COPY assets/docs/README.file.md file/README.md
 COPY assets/docs/README.info.md info/README.md
-COPY assets/docs/README.media.md media/README.md
+COPY assets/docs/README.mix.md mix/README.md
 COPY assets/docs/README.net.md net/README.md
 COPY assets/docs/README.proj.md proj/README.md
 COPY assets/docs/README.repo.md repo/README.md

@@ -1,2 +1,2 @@
-# ~/media Multimedia 
+# ~/mix Media
 *Image, Audio, Video*
