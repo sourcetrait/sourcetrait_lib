@@ -1,5 +1,10 @@
 $env.box_name = 'box'
 
+# execute any one-time setup scripts if they exist
+if ($nu.default-config-dir | path join 'once' | path exists) {
+    nu ($nu.default-config-dir | path join 'once.nu')
+}
+
 # show the banner
 nu ($nu.default-config-dir | path join 'banner.nu')
 

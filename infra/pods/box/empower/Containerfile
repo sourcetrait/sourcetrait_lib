@@ -6,25 +6,30 @@ USER root
 ENV HOME=/root
 WORKDIR /tmp
 
+ENV CLAUDE_CONFIG_DIR="$HOME/.sys/.claude"
+
 # install empower package via copr
 RUN dnf -y copr enable sourcetrait/ai 
 RUN dnf -y update
-RUN dnf -y install sourcetrait_ai_empower
 
 # install claude-code via npm
 npm install -g @anthropic-ai/claude-code
+
+RUN dnf -y install sourcetrait_ai_empower
 
 USER box 
 ENV HOME=/home/box
 WORKDIR /tmp
 
 # install claude env autoload
-COPY --chmod=600 assets/nu/config.claude.nu /home/box/.config/nushell/autoload/
 
 # copy claude assets from empower
 RUN << EOF
 set -eu
-mkdir -p /home/box/sys/.claude
+mkdir -p /home/box/.config/nushell/once
+mkdir -p /home/box/.sys/.claude
+cp /usr/local/share/sourcetrait/empower/claude/nu/claude.config.nu /home/box/.config/nushell/autoload/
+ln /usr/local/share/sourcetrait/empower/claude/nu/claude.once.nu /home/box/.config/nushell/once/claude.once.nu
 cp /usr/local/share/sourcetrait/empower/claude/settings.json /home/box/sys/.claude/ 
 cp /usr/local/share/sourcetrait/empower/claude/CLAUDE.md /home/box/sys/.claude/ 
 EOF

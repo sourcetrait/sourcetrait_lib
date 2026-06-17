@@ -5,13 +5,37 @@ USER root
 ENV HOME=/root
 WORKDIR /tmp
 
+ENV XDG_CONFIG_HOME="$HOME/.config"
 # xdg cache, data, state live in dirs within `~/.sys/.xdg`
 ENV XDG_CACHE_HOME="$HOME/.sys/.xdg/cache"
 ENV XDG_DATA_HOME="$HOME/.sys/.xdg/data"
 ENV XDG_STATE_HOME="$HOME/.sys/.xdg/state"
-ENV XDGX_PRIVATE_HOME="$HOME/.sys/.xdg/private"
+# XDGX_STRICT
+ENV XDGX_STRICT_CONFIG_HOME="$HOME/.config/strict"
+ENV XDGX_STRICT_CACHE_HOME="$HOME/.sys/.xdg/strict/cache"
+ENV XDGX_STRICT_DATA_HOME="$HOME/.sys/.xdg/strict/data"
+ENV XDGX_STRICT_STATE_HOME="$HOME/.sys/.xdg/strict/state"
+# XDGX_SECURE
+ENV XDGX_SECURE_CONFIG_HOME="$HOME/.config/secure"
+ENV XDGX_SECURE_CACHE_HOME="$HOME/.sys/.xdg/secure/cache"
+ENV XDGX_SECURE_DATA_HOME="$HOME/.sys/.xdg/secure/data"
+ENV XDGX_SECURE_STATE_HOME="$HOME/.sys/.xdg/secure/state"
+# XDGX_INSTALL
+ENV XDGX_EXECUTE_HOME="$HOME/.sys/local/bin"
+ENV XDGX_LIBRARY_HOME="$HOME/.sys/local/lib"
+ENV XDGX_PACKAGE_HOME="$HOME/.sys/local/pkg"
 
-RUN mkdir -p $HOME/.sys/.xdg/{cache,data,state} $HOME/.sys/.xdg/private/{cache,data,state}
+ENV XDGX_STRICT_HOME="$HOME/.sys/.xdg/private"
+
+RUN << EOF
+set -eu
+mkdir -p $HOME/.config/{strict,secure}
+mkdir -p $HOME/.sys/.xdg/{cache,data,state}
+mkdir -p $HOME/.sys/.xdg/strict/{cache,data,state}
+mkdir -p $HOME/.sys/.xdg/secure/{cache,data,state}
+mkdir -p $HOME/.sys/local/{bin,etc,games,include,lib,pkg,man,sbin,share,src,var}
+mkdir -p $HOME/.sys/app/{bin,lib,pkg}
+EOF
 
 RUN dnf -y upgrade
 
@@ -40,20 +64,35 @@ COPY --chmod=750 assets/entrypoint.nushell.sh /usr/local/bin/sourcetrait/box/
 # basic ENV setup at SSH login
 COPY --chmod=644 assets/etc/security/pam_env.conf /etc/security/
 
+# create the cache mount point
+RUN << EOF
+set -eu
+mkdir -p /var/local/cache/box
+chown box:box /var/local/cache/box
+chmod 700 /var/local/cache/box
+EOF
+
 # = BEGIN USER box =
 USER box
 ENV HOME=/home/box
 WORKDIR /home/box
 
-RUN mkdir -p $HOME/.sys/.xdg/{cache,data,state} $HOME/.sys/.xdg/private/{cache,data,state}
+RUN << EOF
+set -eu
+mkdir -p $HOME/.config/{strict,secure}
+mkdir -p $HOME/.sys/.xdg/{cache,data,state}
+mkdir -p $HOME/.sys/.xdg/strict/{cache,data,state}
+mkdir -p $HOME/.sys/.xdg/secure/{cache,data,state}
+mkdir -p $HOME/.sys/local/{bin,etc,games,include,lib,pkg,man,sbin,share,src,var}
+mkdir -p $HOME/.sys/app/{bin,lib,pkg}
+EOF
 
 # our user directories take their own approach
 # many of the top-level ones have their own README.md
 RUN mkdir ai back data file info mix net proj repo sync .sys tmp xtra
 RUN mkdir -p mix/{image,video,audio,screen,scan}
 RUN mkdir -p tmp/down
-RUN mkdir -p .sys/app/{bin,lib,share}
-RUN mkdir -p .sys/local/{bin,lib,etc,share,src}
+RUN mkdir -p .sys/app/{bin,lib,pkg}
 
 # copy xdg user dirs settings
 COPY assets/config/user-dirs.dirs .config/ 
@@ -103,9 +142,10 @@ COPY assets/docs/.sys/README.app.md .sys/app/README.md
 COPY assets/docs/.sys/README.local.md .sys/local/README.md
 
 # copy nushell environment scripts
-COPY assets/nu/login.nu .config/nushell/
-COPY assets/nu/banner.nu .config/nushell/
-COPY assets/nu/config.nu .config/nushell/
+COPY --chmod 600 assets/nu/config.nu .config/nushell/
+COPY --chmod 600 assets/nu/banner.nu .config/nushell/
+COPY --chmod 600 assets/nu/login.nu .config/nushell/
+COPY --chmod 600 assets/nu/once.nu .config/nushell/
 
 # configure glow: run it once to setup its `.config`, then edit the style
 RUN glow --version
