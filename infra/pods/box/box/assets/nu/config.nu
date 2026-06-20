@@ -19,6 +19,7 @@ $env.XDG_CACHE_HOME = ($env.HOME | path join '.sys/.xdg/cache')
 $env.XDG_DATA_HOME = ($env.HOME | path join '.sys/.xdg/data')
 $env.XDG_STATE_HOME = ($env.HOME | path join '.sys/.xdg/state')
 
+$env.XDGX_TMP_HOME = ($env.HOME | path join 'tmp')
 $env.XDGX_SHM_DIR = ('/dev/shm' | path join $env.USER)
 
 # our own concept here: mirrored out ({cache,data,home}) with gaurantees:

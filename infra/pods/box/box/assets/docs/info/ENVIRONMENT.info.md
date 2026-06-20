@@ -44,4 +44,5 @@ The following tools / packages are additionally available:
 - `$XDG_CACHE_HOME` `/home/box/.sys/.xdg/cache`
 - `$XDG_DATA_HOME` `/home/box/.sys/.xdg/data`
 - `$XDG_STATE_HOME` `/home/box/.sys/.xdg/state`
+- `$XDGX_TMP_HOME` `/home/box/tmp`
 - `$XDGX_SHM_DIR` `/dev/shm/box`
