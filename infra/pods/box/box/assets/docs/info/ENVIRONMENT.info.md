@@ -38,3 +38,10 @@ The following tools / packages are additionally available:
 - `cargo-expand`, `rust-analyzer` `rust +nightly` `nushell` `python3-lxml`
 - `ripgrep` `tokei` `fd-find` `tree-sitter-cli` `tree-sitter` `libtree-sitter`
 - `libtree-sitter-rust` `jq` `glow` `git-lfs` `yazi`
+
+## Environment Variables
+- `$XDG_CONFIG_HOME` `/home/box/.config`
+- `$XDG_CACHE_HOME` `/home/box/.sys/.xdg/cache`
+- `$XDG_DATA_HOME` `/home/box/.sys/.xdg/data`
+- `$XDG_STATE_HOME` `/home/box/.sys/.xdg/state`
+- `$XDGX_SHM_DIR` `/dev/shm/box`
