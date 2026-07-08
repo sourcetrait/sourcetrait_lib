@@ -41,19 +41,20 @@ RUN dnf -y upgrade
 
 # install custom dnf repositories
 COPY --chmod=0640 assets/repos/gemfury-nushell.repo /etc/yum.repos.d/
-COPY --chmod=0640 assets/repos/charm-glow.repo /etc/yum.repos.d/
+RUN dnf -y copr enable taw/ipfs
 RUN dnf -y copr enable lihaohong/yazi
 
 # install dnf packages
 RUN dnf -y install nushell helix openssh-server openssl-devel nodejs24 npm \
   glow ripgrep python3-lxml tokei fd-find tree-sitter-cli libtree-sitter-rust \
-  jq git-lfs yazi
+  jq git-lfs kubo yazi
 
 # required for ssh to work
 RUN chmod 640 /etc/shadow
 
 # add user with sudo
 RUN useradd -m -k /dev/null -s /usr/bin/nu box
+RUN usermod -aG ipfs box
 RUN echo "box:box" | chpasswd
 COPY --chmod=440 assets/etc/sudoers.d/box /etc/sudoers.d/ 
 

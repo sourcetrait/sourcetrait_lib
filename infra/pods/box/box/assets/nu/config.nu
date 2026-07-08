@@ -12,6 +12,8 @@ $env.PATH = ($env.PATH | append [
   ($env.HOME | path join '.sys/app/bin')
 ])
 
+$env.XDGX_BASE_SPEC = "dotsys"
+
 $env.XDG_CONFIG_HOME = ($env.HOME | path join '.config')
 
 # xdg cache, data, state default to dirs within `~/.sys/.xdg`
@@ -22,29 +24,11 @@ $env.XDG_STATE_HOME = ($env.HOME | path join '.sys/.xdg/state')
 $env.XDGX_TMP_HOME = ($env.HOME | path join 'tmp')
 $env.XDGX_SHM_DIR = ('/dev/shm' | path join $env.USER)
 
-# our own concept here: mirrored out ({cache,data,home}) with gaurantees:
-# - chown user:user
-# - chmod go-rwx
-$env.XDGX_STRICT_CONFIG_HOME = ($env.HOME | path join '.config/strict')
-$env.XDGX_STRICT_CACHE_HOME = ($env.HOME | path join '.sys/.xdg/strict/cache')
-$env.XDGX_STRICT_DATA_HOME = ($env.HOME | path join '.sys/.xdg/strict/data')
-$env.XDGX_STRICT_STATE_HOME = ($env.HOME | path join '.sys/.xdg/strict/state')
-
-# our own concept here: mirrored out ({cache,data,home}) with gaurantees:
-# - all requirements from XDGX_STRICT
-# - extended system access-control architecture is used (selinux, app armor)
-$env.XDGX_SECURE_CONFIG_HOME = ($env.HOME | path join '.config/secure')
-$env.XDGX_SECURE_CACHE_HOME = ($env.HOME | path join '.sys/.xdg/secure/cache')
-$env.XDGX_SECURE_DATA_HOME = ($env.HOME | path join '.sys/.xdg/secure/data')
-$env.XDGX_SECURE_STATE_HOME = ($env.HOME | path join '.sys/.xdg/secure/state')
-
-# vendor defaults for the XDGX concepts: fallback in-order if the env variable
-# isn't available 
-
 # our own concept here: give modern vendors a standard place to install to at
 # a user-level. EXECUTE_HOME is expected to be in the user's PATH
 $env.XDGX_EXECUTE_HOME = ($env.HOME | path join '.sys/local/bin')
 $env.XDGX_LIBRARY_HOME = ($env.HOME | path join '.sys/local/lib')
+$env.XDGX_ASSET_HOME   = ($env.HOME | path join '.sys/local/share')
 $env.XDGX_PACKAGE_HOME = ($env.HOME | path join '.sys/local/pkg')
 
 # setup git's env
@@ -56,6 +40,9 @@ $env.CARGO_TARGET_DIR = '/var/local/cache/box/cargo/target'
 
 # setup rustup's env
 $env.RUSTUP_HOME = ($env.HOME | path join '.sys/.rustup')
+
+# ipfs
+$env.IPFS_PATH = ($env.HOME | path join '.sys/.ipfs')
 
 # setup python's env
 $env.PYTHONUSERBASE = ($env.HOME | path join '.sys/.python')
@@ -83,4 +70,4 @@ $env.EDITOR = "hx"
 # keeping the system timezone in UTC has its portability benefits
 $env.ALT_TZ = "America/Los_Angeles"
 
-umask rwx------
+umask rwx------ | ignore
