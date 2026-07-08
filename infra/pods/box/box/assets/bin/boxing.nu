@@ -226,3 +226,94 @@ def "main" [] { help }
 def super_upgrade_feature_claude [] {
     ^sudo npm install -g @anthropic-ai/claude-code
 }
+
+def user_setup_ipfs_inet_consumer [--force]: nothing -> nothing {
+    if ($env.IPFS_PATH | path exists) {
+        if $force {
+            rm -rf $env.IPFS_PATH
+        } else {
+            error make $"(ansi red)[boxing](ansi reset) IPFS is already configured; use --force to erase."
+        }
+    }
+    
+    mkdir ($env.IPFS_PATH | path dirname)
+    
+    ipfs init --profile lowpower,autoconf-off
+    ipfs config Plugins.Plugins.telemetry.Config.Mode off
+    ipfs config --json Addresses.Swarm '[]'
+    ipfs config Addresses.API /ip4/127.0.0.1/tcp/5001
+    ipfs config Addresses.Gateway /ip4/127.0.0.1/tcp/8080
+    ipfs config --json AutoTLS.Enabled false
+    ipfs config --json Discovery.MDNS.Enabled false
+    ipfs config --json Routing.DelegatedRouters '[]'
+    ipfs config --json Ipns.DelegatedPublishers '[]'
+    ipfs config --json DNS.Resolvers '{}'
+    ipfs config --json Swarm.DisableNatPortMap true
+
+    # hardcoded list
+    ipfs config --json Bootstrap '["/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN", "/dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa", "/dnsaddr/bootstrap.libp2p.io/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb", "/dnsaddr/bootstrap.libp2p.io/p2p/QmcZf59bWwK5XFi76CZX8cbJ4BhTzzA3gU1ZjYZcYW3dwt", "/dnsaddr/va1.bootstrap.libp2p.io/p2p/12D3KooWKnDdG3iXw9eTFijk3EWSunZcFi54Zka4wmtqtt6rPxc8"]'
+}
+
+# Only for containers routed for inbound. Not usable on Box.
+def user_setup_ipfs_inet_publisher [--force]: nothing -> nothing {
+    $env.IPFS_PATH = ($env.IPFS_BASE_PATH | path join 'inet/publisher' | path expand)
+    
+    if ($env.IPFS_PATH | path exists) {
+        if $force {
+            rm -rf $env.IPFS_PATH
+        } else {
+            error make $"(ansi red)[boxing](ansi reset) IPFS is already configured; use --force to erase."
+        }
+    }
+
+    mkdir ($env.IPFS_PATH | path dirname)
+
+    # no lowpower: a publisher wants the default conn manager and the
+    # full provide/reprovide system that keeps DHT records alive
+    ipfs init --profile autoconf-off
+    ipfs config Plugins.Plugins.telemetry.Config.Mode off
+    # default Addresses.Swarm kept: tcp+quic listeners on 4001 -- inbound is the point
+    ipfs config Addresses.API /ip4/127.0.0.1/tcp/5001
+    ipfs config Addresses.Gateway /ip4/127.0.0.1/tcp/8080
+    ipfs config --json AutoTLS.Enabled false
+    ipfs config --json Discovery.MDNS.Enabled false
+    ipfs config --json Routing.DelegatedRouters '[]'
+    ipfs config --json Ipns.DelegatedPublishers '[]'
+    ipfs config --json DNS.Resolvers '{}'
+    # NAT traversal: UPnP/NAT-PMP stays enabled (default), relay + hole punching explicit
+    ipfs config --json Swarm.RelayClient.Enabled true
+    ipfs config --json Swarm.EnableHolePunching true
+    ipfs config Provide.Strategy pinned
+
+    # hardcoded list
+    ipfs config --json Bootstrap '["/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN", "/dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa", "/dnsaddr/bootstrap.libp2p.io/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb", "/dnsaddr/bootstrap.libp2p.io/p2p/QmcZf59bWwK5XFi76CZX8cbJ4BhTzzA3gU1ZjYZcYW3dwt", "/dnsaddr/va1.bootstrap.libp2p.io/p2p/12D3KooWKnDdG3iXw9eTFijk3EWSunZcFi54Zka4wmtqtt6rPxc8"]'
+}
+
+def user_setup_ipfs_localhost_publisher [--force]: nothing -> nothing {
+    $env.IPFS_PATH = ($env.IPFS_BASE_PATH | path join 'localhost/publisher')
+
+    if ($env.IPFS_PATH | path exists) {
+        if $force {
+            rm -rf $env.IPFS_PATH
+        } else {
+            error make {msg: $"(ansi red)[boxing](ansi reset) IPFS localhost publisher is already configured; use --force to erase."}
+        }
+    }
+    
+    mkdir ($env.IPFS_PATH | path dirname)
+
+    ipfs init --profile autoconf-off
+    ipfs config Plugins.Plugins.telemetry.Config.Mode off
+    # loopback-only listener + empty bootstrap: local-only by construction
+    ipfs config --json Addresses.Swarm '["/ip4/127.0.0.1/tcp/4002"]'
+    ipfs config Addresses.API /ip4/127.0.0.1/tcp/5002
+    ipfs config Addresses.Gateway ""
+    ipfs config --json Bootstrap '[]'
+    ipfs config --json AutoTLS.Enabled false
+    ipfs config --json Discovery.MDNS.Enabled false
+    ipfs config --json Routing.DelegatedRouters '[]'
+    ipfs config --json Ipns.DelegatedPublishers '[]'
+    ipfs config --json DNS.Resolvers '{}'
+    ipfs config --json Swarm.DisableNatPortMap true
+    ipfs config --json Swarm.RelayClient.Enabled false
+}

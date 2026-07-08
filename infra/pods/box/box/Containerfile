@@ -152,6 +152,15 @@ COPY --chmod 600 assets/nu/once.nu .config/nushell/
 RUN glow --version
 RUN sed -i'' 's/style: "auto"/style: "tokyo-night"/g' .config/glow/glow.yml
 
+# configure IPFS node to run in consumer-only mode
+RUN ipfs init --profile lowpower
+RUN ipfs config Plugins.Plugins.telemetry.Config.Mode off
+RUN ipfs config --json Addresses.Swarm '[]'
+RUN ipfs config Addresses.API /ip4/127.0.0.1/tcp/5001
+RUN ipfs config Addresses.Gateway /ip4/127.0.0.1/tcp/8080
+RUN ipfs config --json AutoTLS.Enabled false 
+RUN ipfs config --json Discovery.MDNS.Enabled false
+
 # = BEGIN USER ROOT =
 USER root
 ENV HOME=/root
